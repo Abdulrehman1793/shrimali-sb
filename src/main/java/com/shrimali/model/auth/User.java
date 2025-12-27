@@ -11,10 +11,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -45,9 +43,13 @@ public class User implements UserDetails {
     @Column(name = "password_hash", columnDefinition = "text")
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "auth_provider", length = 50)
-    private AuthProviderType authProvider;
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "auth_provider", length = 50)
+//    private AuthProviderType authProvider;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserSocialAccount> socialAccounts = new HashSet<>();
 
     @Column
     private String status;
@@ -74,15 +76,13 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (userRoles == null) {
-            return List.of();
-        }
-        return userRoles.stream()
+        return (userRoles == null) ? List.of() : userRoles.stream()
                 .map(UserRole::getRole)
+                .filter(Objects::nonNull) // Safety check
                 .map(Role::getName)
-                .map(Enum::name) // ROLE_ADMIN
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+                .filter(Objects::nonNull) // Safety check
+                .map(roleName -> new SimpleGrantedAuthority(roleName.name()))
+                .collect(Collectors.toList());
     }
 
     @Override

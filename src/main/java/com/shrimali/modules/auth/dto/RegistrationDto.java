@@ -24,4 +24,5 @@ public class RegistrationDto {
     private LocalDate dob;
     private boolean emailVerified;
     private AuthProviderType authProvider;
+    private String providerId;
 }

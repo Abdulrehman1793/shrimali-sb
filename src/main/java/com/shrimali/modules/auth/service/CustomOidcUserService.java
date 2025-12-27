@@ -31,6 +31,7 @@ public class CustomOidcUserService extends OidcUserService {
                 .firstName((String) attrs.get("given_name"))
                 .lastName((String) attrs.get("family_name"))
                 .photoUrl((String) attrs.get("picture"))
+                .providerId(oidcUser.getSubject()) // Google's unique ID
                 .authProvider(AuthProviderType.GOOGLE)
                 .emailVerified(true)
                 .build();
