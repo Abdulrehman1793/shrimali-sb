@@ -19,7 +19,7 @@ public class MemberResponse {
     private String gender;
     private String dob; // ISO date string
     private String membershipType;
-    private MemberShipStatus membershipStatus;
+    private String membershipStatus;
     private String city;
     private String photoUrl;
     private String notes;

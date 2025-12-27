@@ -1,16 +1,15 @@
 package com.shrimali.modules.auth.service;
 
-import com.shrimali.model.Member;
 import com.shrimali.model.auth.Role;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.auth.UserRole;
 import com.shrimali.model.auth.UserSocialAccount;
 import com.shrimali.model.enums.AuthProviderType;
 import com.shrimali.model.enums.RoleName;
+import com.shrimali.model.enums.UserStatus;
 import com.shrimali.modules.auth.dto.RegistrationDto;
 import com.shrimali.modules.shared.services.AuditService;
 import com.shrimali.modules.shared.services.EmailService;
-import com.shrimali.repositories.MemberRepository;
 import com.shrimali.repositories.RoleRepository;
 import com.shrimali.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -27,7 +26,6 @@ import java.util.HashSet;
 @Slf4j
 public class UserRegistrationService {
     private final UserRepository userRepository;
-    private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -36,48 +34,49 @@ public class UserRegistrationService {
 
     @Transactional
     public User registerOrUpdateUser(RegistrationDto dto) {
-        // 1. Find or Create User
+        // 1. Find or Create the User Account
+        // Note: We no longer create a Member inside createNewUser
         User user = userRepository.findByEmail(dto.getEmail())
-                .orElseGet(() -> createNewUserAndMember(dto));
+                .orElseGet(() -> createNewUser(dto));
 
-        // 2. If it's a Social Login, handle the Link
+        // 2. Handle Social Auth Linking
         if (dto.getAuthProvider() != AuthProviderType.LOCAL) {
             handleSocialLink(user, dto);
         }
 
-        // 3. Update login metadata
+        // 3. Update metadata
         user.setLastLoginAt(OffsetDateTime.now());
         user.setUpdatedAt(OffsetDateTime.now());
 
         return userRepository.save(user);
     }
 
-    private User createNewUserAndMember(RegistrationDto dto) {
+    private User createNewUser(RegistrationDto dto) {
         Role guestRole = roleRepository.findByName(RoleName.ROLE_GUEST)
                 .orElseThrow(() -> new RuntimeException("Default Role not found"));
 
-        Member member = memberRepository.save(Member.builder()
-                .firstName(dto.getFirstName())
-                .lastName(dto.getLastName())
-                .photoUrl(dto.getPhotoUrl())
-                .build());
-
+        // Build User WITHOUT a Member link
         User user = User.builder()
                 .email(dto.getEmail())
                 .emailVerified(dto.isEmailVerified())
                 .passwordHash(dto.getPassword() != null ? passwordEncoder.encode(dto.getPassword()) : null)
-                .memberId(member.getId())
-                .status("ACTIVE")
+                // Use a status that tells the frontend to show the "Search/Claim" popup
+                .status(UserStatus.PENDING_PROFILE)
                 .createdAt(OffsetDateTime.now())
                 .userRoles(new HashSet<>())
                 .socialAccounts(new HashSet<>())
                 .build();
 
-        user.getUserRoles().add(UserRole.builder().role(guestRole).build());
+        // Bidirectional link for the role
+        UserRole userRole = UserRole.builder()
+                .role(guestRole)
+                .build();
+        user.getUserRoles().add(userRole);
 
-        log.info("Creating new user via {}", dto.getAuthProvider());
+        log.info("Creating user account for {} (No member profile linked yet)", dto.getEmail());
+
         emailService.sendWelcomeEmail(user.getEmail());
-        auditService.logAction(user.getEmail(), "USER_REGISTRATION", "Registered via " + dto.getAuthProvider());
+        auditService.logAction("USER_ACCOUNT_CREATED", "Account created via " + dto.getAuthProvider());
 
         return user;
     }
@@ -95,7 +94,7 @@ public class UserRegistrationService {
                     .build();
             user.getSocialAccounts().add(account);
 
-            auditService.logAction(user.getEmail(), "ACCOUNT_LINKED", "Linked " + dto.getAuthProvider());
+            auditService.logAction("ACCOUNT_LINKED", "Linked " + dto.getAuthProvider() + " account");
         }
     }
 }

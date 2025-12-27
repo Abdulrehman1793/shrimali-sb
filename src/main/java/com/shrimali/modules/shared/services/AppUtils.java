@@ -16,25 +16,14 @@ public class AppUtils {
         if (m.getDob() != null) filledFields++;
         if (isNotBlank(m.getGender())) filledFields++;
 
-        if (isNotBlank(m.getFatherFirstName())) filledFields++;
-        if (isNotBlank(m.getFatherMiddleName())) filledFields++;
-        if (isNotBlank(m.getFatherLastName())) filledFields++;
         if (isNotBlank(m.getPaternalVillage())) filledFields++;
-        totalFields += 4;
+        totalFields += 1;
 
-        if (isNotBlank(m.getMotherFirstName())) filledFields++;
-        if (isNotBlank(m.getMotherMiddleName())) filledFields++;
-        if (isNotBlank(m.getMotherLastName())) filledFields++;
         if (isNotBlank(m.getNaniyalVillage())) filledFields++;
-        totalFields += 4;
+        totalFields += 1;
 
         if ("married".equalsIgnoreCase(m.getMaritalStatus())) {
-            if (isNotBlank(m.getSpouseFirstName())) filledFields++;
-            if (isNotBlank(m.getSpouseMiddleName())) filledFields++;
-            if (isNotBlank(m.getSpouseLastName())) filledFields++;
-            if (isNotBlank(m.getSpousePaternalVillage())) filledFields++;
-            if (isNotBlank(m.getSpouseNaniyalVillage())) filledFields++;
-            totalFields += 5;
+            totalFields += 3;
         }
 
         return (filledFields * 100) / totalFields;

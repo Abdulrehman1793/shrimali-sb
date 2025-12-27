@@ -11,156 +11,131 @@ import java.time.OffsetDateTime;
 import java.time.LocalDate;
 import java.util.Set;
 
-@Entity
-@Table(name = "members")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Member {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Entity
+    @Table(name = "members")
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public class Member {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
-    @Column(name = "membership_number", nullable = false, unique = true, length = 50)
-    private String membershipNumber;
+        @Column(name = "membership_number", nullable = false, unique = true, length = 50)
+        private String membershipNumber;
 
-    @Column(name = "first_name", nullable = false, length = 100)
-    private String firstName;
+        @Column(name = "first_name", nullable = false, length = 100)
+        private String firstName;
 
-    @Column(name = "middle_name", length = 100)
-    private String middleName;
+        @Column(name = "middle_name", length = 100)
+        private String middleName;
 
-    @Column(name = "last_name", nullable = false, length = 100)
-    private String lastName;
+        @Column(name = "last_name", nullable = false, length = 100)
+        private String lastName;
 
-    // --- Father's Details ---
-    @Column(name = "father_first_name", length = 100)
-    private String fatherFirstName;
+        // --- CRITICAL FIX: Direct Object Links ---
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "father_id")
+        private Member father; // Points to the Father's Member record
 
-    @Column(name = "father_middle_name", length = 100)
-    private String fatherMiddleName;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "mother_id")
+        private Member mother; // Points to the Mother's Member record
 
-    @Column(name = "father_last_name", length = 100)
-    private String fatherLastName;
+        @OneToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "spouse_id")
+        private Member spouse; // Points to the Spouse's Member record
 
-    @Column(name = "paternal_village", length = 200)
-    private String paternalVillage; // Father's ancestral home
+        // --- Status Flags ---
+        @Column(name = "is_deceased")
+        private boolean deceased = false;
 
-    // --- Mother's Details ---
-    @Column(name = "mother_first_name", length = 100)
-    private String motherFirstName;
+        @Column(name = "date_of_death")
+        private LocalDate dateOfDeath;
 
-    @Column(name = "mother_middle_name", length = 100)
-    private String motherMiddleName;
+        // --- Ownership (For Ghost Profiles) ---
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "owner_user_id")
+        private User owner; // The user who created this profile (e.g., the Son)
 
-    @Column(name = "mother_last_name", length = 100)
-    private String motherLastName;
+        @OneToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "linked_user_id")
+        private User linkedUser; // The user who "claimed" this profile
 
-    @Column(name = "naniyal_village", length = 200)
-    private String naniyalVillage; // Mother's ancestral home (Naniyal)
+        // --- Ancestral Metadata ---
+        @Column(name = "paternal_village", length = 200)
+        private String paternalVillage;
 
-    @Column(name = "kuldevi", length = 250)
-    private String kuldevi;
+        @Column(name = "naniyal_village", length = 200)
+        private String naniyalVillage;
 
-    // --- Spouse Details (Manual) ---
-    @Column(name = "spouse_first_name", length = 100)
-    private String spouseFirstName;
+        @Column(name = "kuldevi", length = 250)
+        private String kuldevi;
 
-    @Column(name = "spouse_middle_name", length = 100)
-    private String spouseMiddleName;
+        @Column(name = "marriage_date")
+        private LocalDate marriageDate;
 
-    @Column(name = "spouse_last_name", length = 100)
-    private String spouseLastName;
+        // --- Other Fields ---
+        private String gender;
+        private LocalDate dob;
+        private String profession;
+        private String education;
 
-    @Column(name = "spouse_paternal_village", length = 200)
-    private String spousePaternalVillage;
+        @Column(name = "marital_status")
+        private String maritalStatus;
 
-    @Column(name = "spouse_naniyal_village", length = 200)
-    private String spouseNaniyalVillage;
+        @Column(name = "membership_type")
+        private String membershipType;
 
-    @Column(name = "marriage_date")
-    private LocalDate marriageDate;
+        @Column(name = "membership_status")
+        private String membershipStatus;
 
-    private String gender;
+        @CreationTimestamp
+        @Column(name = "joined_at")
+        private OffsetDateTime joinedAt;
 
-    private LocalDate dob;
+        @Column(name = "approved_at")
+        private OffsetDateTime approvedAt;
 
-    @Column(name = "marital_status")
-    private String maritalStatus;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "approved_by_user_id")
+        private User approvedBy;
 
-    private String profession;
+        @Column(columnDefinition = "text")
+        private String notes;
 
-    private String education;
+        @Column(name = "photo_url")
+        private String photoUrl;
 
-    @Column(name = "membership_type")
-    private String membershipType;
+        @CreationTimestamp
+        @Column(name = "created_at")
+        private OffsetDateTime createdAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "membership_status")
-    private MemberShipStatus membershipStatus;
+        @UpdateTimestamp
+        @Column(name = "updated_at")
+        private OffsetDateTime updatedAt;
 
-    @CreationTimestamp
-    @Column(name = "joined_at")
-    private OffsetDateTime joinedAt;
+        @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+        private Set<MemberContact> contacts;
 
-    @Column(name = "approved_at")
-    private OffsetDateTime approvedAt;
+        @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+        private Set<MemberAddress> addresses;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approved_by_user_id")
-    private User approvedBy;
+        // --- Logic for Membership Number ---
+        @PrePersist
+        public void ensureMembershipNumber() {
+            if (this.membershipNumber == null) {
+                this.membershipNumber = generateMemberNumber(firstName, middleName, lastName);
+            }
+        }
 
-    @Column(columnDefinition = "text")
-    private String notes;
-
-    @Column(name = "photo_url")
-    private String photoUrl;
-
-    @CreationTimestamp
-    @Column(name = "created_at")
-    private OffsetDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
-
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MemberContact> contacts;
-
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MemberAddress> addresses;
-
-    public static String generateMemberNumber(String first, String middle, String last) {
-        // 1. Clean and combine names (e.g., "Rahul Kumar Shrimali")
-        String fullName = (first + (middle != null ? middle : "") + last)
-                .replaceAll("\\s+", "")
-                .toUpperCase();
-
-        // 2. Get Initials (e.g., "RKS")
-        String initials = "";
-        if (first != null && !first.isEmpty()) initials += first.substring(0, 1).toUpperCase();
-        if (middle != null && !middle.isEmpty()) initials += middle.substring(0, 1).toUpperCase();
-        if (last != null && !last.isEmpty()) initials += last.substring(0, 1).toUpperCase();
-
-        // 3. Create a unique hash based on Full Name + Current Nano Time
-        // Using nanoseconds ensures that even if two "Rahul Kumar Shrimalis" join,
-        // their IDs will be different.
-        String salt = String.valueOf(System.nanoTime());
-        int uniqueHash = Math.abs((fullName + salt).hashCode()) % 10000000;
-
-        // 4. Return format: RKS-1234567 (Initials + Unique Number)
-        return initials + "-" + String.format("%07d", uniqueHash);
-    }
-
-    @PrePersist
-    public void ensureMembershipNumber() {
-        if (this.membershipNumber == null || this.membershipNumber.isEmpty()) {
-            this.membershipNumber = generateMemberNumber(
-                    this.firstName,
-                    this.middleName,
-                    this.lastName
-            );
+        public static String generateMemberNumber(String first, String middle, String last) {
+            String initials = (first.charAt(0) +
+                    (middle != null && !middle.isEmpty() ? middle.substring(0,1) : "") +
+                    last.charAt(0)).toUpperCase();
+            String salt = String.valueOf(System.nanoTime());
+            int uniqueHash = Math.abs((first + last + salt).hashCode()) % 10000000;
+            return initials + "-" + String.format("%07d", uniqueHash);
         }
     }
-}

@@ -1,5 +1,6 @@
 package com.shrimali.model.auditing;
 
+import com.shrimali.model.auth.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,7 +22,9 @@ public class AuditLog {
     @Column(nullable = false)
     private String action;         // e.g., "USER_REGISTRATION", "ROLE_ADDED"
 
-    private String actor;          // The email of the person performing the action
+    @ManyToOne
+    @JoinColumn(name = "actor_user_id")
+    private User actor;
 
     private String target;         // The email of the user being affected
 

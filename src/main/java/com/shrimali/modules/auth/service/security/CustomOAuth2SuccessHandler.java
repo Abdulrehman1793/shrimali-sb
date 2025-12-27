@@ -1,6 +1,7 @@
 package com.shrimali.modules.auth.service.security;
 
 import com.shrimali.model.auth.User;
+import com.shrimali.model.enums.UserStatus;
 import com.shrimali.repositories.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,7 +52,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         User user = userRepository.findByEmail(email).orElseGet(() -> {
             User u = new User();
             u.setEmail(email);
-            u.setStatus("ACTIVE");
+            u.setStatus(UserStatus.ACTIVE);
             // set other fields if needed
             return userRepository.save(u);
         });

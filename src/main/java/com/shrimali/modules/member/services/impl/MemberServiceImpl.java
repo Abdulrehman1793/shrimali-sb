@@ -204,7 +204,7 @@ public class MemberServiceImpl implements MemberService {
         // Member update
         member.setApprovedBy(approvedBy);
         member.setApprovedAt(OffsetDateTime.now());
-        member.setMembershipStatus(MemberShipStatus.APPROVED);
+        member.setMembershipStatus("APPROVED");
 
         userRepository.save(guestUser);
         memberRepository.save(member);
@@ -311,7 +311,7 @@ public class MemberServiceImpl implements MemberService {
 
         // 7️⃣ Update member status
         member.setApprovedBy(actionBy);
-        member.setMembershipStatus(MemberShipStatus.REJECTED);
+        member.setMembershipStatus("REJECTED");
         // member.setApprovedAt(OffsetDateTime.now()); // optional audit
 
         // 8️⃣ Persist
@@ -336,7 +336,7 @@ public class MemberServiceImpl implements MemberService {
                 .mother(mapToMother(member))
                 .spouse(mapToSpouse(member))
                 .metadata(ProfileMetadataDTO.builder()
-                        .membershipStatus(member.getMembershipStatus() == null ? null : member.getMembershipStatus().name())
+                        .membershipStatus(member.getMembershipStatus() == null ? null : member.getMembershipStatus())
                         .completionPercentage(AppUtils.calculateCompletion(member))
                         .gotra(gotra)
                         .build())
@@ -370,9 +370,6 @@ public class MemberServiceImpl implements MemberService {
     public void updateFatherDetails(Principal principal, FatherDetailsDTO dto) {
         Member member = getMember(principal);
 
-        member.setFatherFirstName(dto.getFatherFirstName());
-        member.setFatherMiddleName(dto.getFatherMiddleName());
-        member.setFatherLastName(dto.getFatherLastName());
         member.setPaternalVillage(dto.getPaternalVillage());
 
         memberRepository.save(member);
@@ -383,12 +380,6 @@ public class MemberServiceImpl implements MemberService {
     public void updateSpouseDetails(Principal principal, SpouseDetailsDTO dto) {
         Member member = getMember(principal);
 
-        member.setSpouseFirstName(dto.getSpouseFirstName());
-        member.setSpouseMiddleName(dto.getSpouseMiddleName());
-        member.setSpouseLastName(dto.getSpouseLastName());
-        member.setSpousePaternalVillage(dto.getSpousePaternalVillage());
-        member.setSpouseNaniyalVillage(dto.getSpouseNaniyalVillage());
-
         memberRepository.save(member);
     }
 
@@ -397,9 +388,6 @@ public class MemberServiceImpl implements MemberService {
     public void updateMotherDetails(Principal principal, MotherDetailsDTO dto) {
         Member member = getMember(principal);
 
-        member.setMotherFirstName(dto.getMotherFirstName());
-        member.setMotherMiddleName(dto.getMotherMiddleName());
-        member.setMotherLastName(dto.getMotherLastName());
         member.setNaniyalVillage(dto.getNaniyalVillage());
 
         memberRepository.save(member);
@@ -478,29 +466,18 @@ public class MemberServiceImpl implements MemberService {
 
     private FatherDetailsDTO mapToFather(Member m) {
         FatherDetailsDTO dto = new FatherDetailsDTO();
-        dto.setFatherFirstName(m.getFatherFirstName());
-        dto.setFatherMiddleName(m.getFatherMiddleName());
-        dto.setFatherLastName(m.getFatherLastName());
         dto.setPaternalVillage(m.getPaternalVillage());
         return dto;
     }
 
     private MotherDetailsDTO mapToMother(Member m) {
         MotherDetailsDTO dto = new MotherDetailsDTO();
-        dto.setMotherFirstName(m.getMotherFirstName());
-        dto.setMotherMiddleName(m.getMotherMiddleName());
-        dto.setMotherLastName(m.getMotherLastName());
         dto.setNaniyalVillage(m.getNaniyalVillage());
         return dto;
     }
 
     private SpouseDetailsDTO mapToSpouse(Member m) {
         SpouseDetailsDTO dto = new SpouseDetailsDTO();
-        dto.setSpouseFirstName(m.getSpouseFirstName());
-        dto.setSpouseMiddleName(m.getSpouseMiddleName());
-        dto.setSpouseLastName(m.getSpouseLastName());
-        dto.setSpousePaternalVillage(m.getSpousePaternalVillage());
-        dto.setSpouseNaniyalVillage(m.getSpouseNaniyalVillage());
         dto.setMarriageDate(m.getMarriageDate());
         return dto;
     }

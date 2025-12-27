@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
-@Profile("seed")
 @RequiredArgsConstructor
 @Transactional
 public class GotraStartupSeeder implements ApplicationRunner {

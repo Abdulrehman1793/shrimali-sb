@@ -1,7 +1,9 @@
 package com.shrimali.modules.shared.services;
 
 import com.shrimali.model.auditing.AuditLog;
+import com.shrimali.model.auth.User;
 import com.shrimali.repositories.AuditLogRepository;
+import com.shrimali.repositories.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,36 +20,34 @@ public class AuditService {
     private final AuditLogRepository auditLogRepository;
     private final HttpServletRequest request;
 
+    private final UserRepository userRepository;
+
     /**
-     * General purpose logging for actions like Registration or Profile Updates.
+     * Logs Family Tree changes (Adding children, updating deceased profiles).
      */
-    public void logAction(String targetEmail, String action, String details) {
-        String actorEmail = getCurrentUserEmail();
-
-        // If it's a registration, the actor and target are the same person
-        if (actorEmail.equals("anonymousUser")) {
-            actorEmail = targetEmail;
-        }
-
-        saveLog(actorEmail, targetEmail, action, details);
+    public void logMemberAction(String action, Long targetMemberId, String details) {
+        User actor = getCurrentUserEntity();
+        saveLog(actor, action, "MEMBER_ID: " + targetMemberId + " | " + details);
     }
 
     /**
-     * Specific logging for Authority/Role changes.
+     * Logs Claim Transitions (The Token-sharing process).
      */
-    public void logRoleChange(String targetEmail, String roleName, boolean added) {
-        String actorEmail = getCurrentUserEmail();
-        String action = added ? "ROLE_ADDED" : "ROLE_REMOVED";
-        String details = String.format("Role [%s] was %s by %s",
-                roleName, added ? "assigned" : "revoked", actorEmail);
-
-        saveLog(actorEmail, targetEmail, action, details);
+    public void logClaimAction(String action, String requesterEmail, String details) {
+        User actor = getCurrentUserEntity();
+        saveLog(actor, action, "Requester: " + requesterEmail + " | " + details);
     }
 
-    private void saveLog(String actor, String target, String action, String details) {
+    /**
+     * Legacy support for general actions.
+     */
+    public void logAction(String action, String details) {
+        saveLog(getCurrentUserEntity(), action, details);
+    }
+
+    private void saveLog(User actor, String action, String details) {
         AuditLog auditLog = AuditLog.builder()
-                .actor(actor)
-                .target(target)
+                .actor(actor) // Now stores the actual User object
                 .action(action)
                 .details(details)
                 .ipAddress(getClientIp())
@@ -55,22 +55,24 @@ public class AuditService {
                 .build();
 
         auditLogRepository.save(auditLog);
-        log.info("AUDIT | Action: {} | Actor: {} | Target: {}", action, actor, target);
+        log.info("AUDIT | Action: {} | Actor: {} | Details: {}",
+                action, (actor != null ? actor.getEmail() : "SYSTEM"), details);
     }
 
-    private String getCurrentUserEmail() {
+    private User getCurrentUserEntity() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            return "anonymousUser";
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null; // System action or Registration
         }
-        return auth.getName();
+        // Fetch the actual User entity from DB to maintain the Foreign Key relationship
+        return userRepository.findByEmail(auth.getName()).orElse(null);
     }
 
     private String getClientIp() {
-        String remoteAddr = request.getHeader("X-FORWARDED-FOR");
-        if (remoteAddr == null || remoteAddr.isEmpty()) {
-            remoteAddr = request.getRemoteAddr();
+        String xf = request.getHeader("X-FORWARDED-FOR");
+        if (xf != null && !xf.isEmpty()) {
+            return xf.split(",")[0]; // Get the first IP in the chain
         }
-        return remoteAddr;
+        return request.getRemoteAddr();
     }
 }

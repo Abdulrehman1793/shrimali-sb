@@ -1,6 +1,7 @@
 package com.shrimali.model.auth;
 
 import com.shrimali.model.enums.AuthProviderType;
+import com.shrimali.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,7 +17,8 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -43,16 +45,13 @@ public class User implements UserDetails {
     @Column(name = "password_hash", columnDefinition = "text")
     private String passwordHash;
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "auth_provider", length = 50)
-//    private AuthProviderType authProvider;
-
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserSocialAccount> socialAccounts = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
     @Column
-    private String status;
+    private UserStatus status = UserStatus.ACTIVE;
 
     @Column(name = "last_login_at")
     private OffsetDateTime lastLoginAt;

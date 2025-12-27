@@ -25,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -164,9 +165,16 @@ public class AuthServiceImpl implements AuthService {
     public UserResponse me(Principal principal) {
         User user = getUser(principal);
 
-        Member member = memberRepository
-                .findById(user.getMemberId())
-                .orElseThrow(() -> new BadRequestException("User not found"));
+        if (user.getMemberId() == null) {
+            return buildIncompleteProfileResponse(user);
+        }
+
+        Optional<Member> memberOpt = memberRepository.findById(user.getMemberId());
+
+        if (memberOpt.isEmpty()) {
+            return buildIncompleteProfileResponse(user);
+        }
+        Member member = memberOpt.get();
 
         RoleName role = user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority) // ROLE_ADMIN
@@ -199,8 +207,18 @@ public class AuthServiceImpl implements AuthService {
                 new TokenResponse(token));
     }
 
+    private UserResponse buildIncompleteProfileResponse(User user) {
+        return UserResponse.builder()
+                .email(user.getEmail())
+                .emailVerified(user.getEmailVerified())
+                .phone(user.getPhone())
+                .completed(false)
+                .completionPercentage(0)
+                .build();
+    }
+
     private User getUser(Principal principal) {
-        if(principal == null) {
+        if (principal == null) {
             throw new BadRequestException("Invalid credentials");
         }
         return (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
