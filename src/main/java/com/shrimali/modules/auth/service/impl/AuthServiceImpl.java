@@ -8,7 +8,7 @@ import com.shrimali.model.enums.AuthProviderType;
 import com.shrimali.model.enums.RoleName;
 import com.shrimali.modules.auth.dto.*;
 import com.shrimali.modules.auth.service.AuthService;
-import com.shrimali.modules.auth.service.JwtUtil;
+import com.shrimali.modules.auth.service.security.JwtUtil;
 import com.shrimali.modules.auth.service.OtpService;
 import com.shrimali.modules.auth.service.UserRegistrationService;
 import com.shrimali.modules.shared.services.AppUtils;

@@ -1,4 +1,4 @@
-package com.shrimali.modules.auth.service;
+package com.shrimali.modules.auth.service.security;
 
 import com.shrimali.model.auth.User;
 import com.shrimali.repositories.UserRepository;

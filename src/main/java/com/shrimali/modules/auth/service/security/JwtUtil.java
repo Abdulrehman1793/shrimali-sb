@@ -1,4 +1,4 @@
-package com.shrimali.modules.auth.service;
+package com.shrimali.modules.auth.service.security;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

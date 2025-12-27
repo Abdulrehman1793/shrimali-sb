@@ -1,7 +1,7 @@
 package com.shrimali.config;
 
-import com.shrimali.modules.auth.service.CustomUserDetailsService;
-import com.shrimali.modules.auth.service.JwtUtil;
+import com.shrimali.modules.auth.service.security.CustomUserDetailsService;
+import com.shrimali.modules.auth.service.security.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

@@ -1,5 +1,6 @@
-package com.shrimali.modules.auth.service;
+package com.shrimali.modules.auth.service.security;
 
+import com.shrimali.modules.auth.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,6 +1,9 @@
 package com.shrimali.config;
 
-import com.shrimali.modules.auth.service.*;
+import com.shrimali.modules.auth.service.security.CustomOAuth2SuccessHandler;
+import com.shrimali.modules.auth.service.security.CustomOidcUserService;
+import com.shrimali.modules.auth.service.security.CustomUserDetailsService;
+import com.shrimali.modules.auth.service.security.HttpCookieOAuth2AuthorizationRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

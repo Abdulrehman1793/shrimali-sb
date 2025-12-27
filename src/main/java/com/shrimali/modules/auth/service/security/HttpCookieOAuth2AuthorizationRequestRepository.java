@@ -1,4 +1,4 @@
-package com.shrimali.modules.auth.service;
+package com.shrimali.modules.auth.service.security;
 
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,7 +7,6 @@ import org.springframework.security.oauth2.client.web.AuthorizationRequestReposi
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.SerializationUtils;
-import org.springframework.web.util.WebUtils;
 
 import java.util.Base64;
 

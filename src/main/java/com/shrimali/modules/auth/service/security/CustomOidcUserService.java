@@ -1,7 +1,8 @@
-package com.shrimali.modules.auth.service;
+package com.shrimali.modules.auth.service.security;
 
 import com.shrimali.model.enums.AuthProviderType;
 import com.shrimali.modules.auth.dto.RegistrationDto;
+import com.shrimali.modules.auth.service.UserRegistrationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
