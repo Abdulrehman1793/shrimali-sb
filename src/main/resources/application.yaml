@@ -1,0 +1,102 @@
+# ===================================================================
+# PRIMARY APPLICATION SETTINGS
+# ===================================================================
+spring:
+  application:
+    name: Shrimali
+
+  profiles:
+    active: dev
+
+  # --- DATABASE (PostgreSQL) ---
+  datasource:
+    url: jdbc:postgresql://localhost:5432/shrimali_db
+    username: ${PG_USERNAME}
+    password: ${PG_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: Shrimali-HikariPool
+      maximum-pool-size: 20
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # --- ORM (Hibernate/JPA) ---
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        order_inserts: true
+        generate_statistics: false
+        jdbc:
+          batch_size: 1000
+
+  # --- EMAIL (Gmail SMTP) ---
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        debug: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # --- SECURITY (OAuth2) ---
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid, profile, email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          google:
+            user-name-attribute: sub
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+
+  # --- FILE UPLOADS ---
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  web:
+    error:
+      include-message: always
+
+# ===================================================================
+# SERVER & LOGGING
+# ===================================================================
+server:
+  port: 3005
+
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: ERROR
+
+# ===================================================================
+# CUSTOM APPLICATION PROPERTIES
+# ===================================================================
+app:
+  env: dev
+  client:
+    url: "http://localhost:5173"
+  cookie:
+    secure: false      # Set to 'true' in production with HTTPS
+    same-site: "Lax"
+    domain: ""
+
+aws:
+  s3:
+    bucket-name: "shrimali-profile-images"

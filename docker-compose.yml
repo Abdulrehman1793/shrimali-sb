@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  react-app:
+    image: abdulrehman1793/shrimal-react-app:1.1
+    container_name: shrimali-react
+    restart: always
+    ports:
+      - "127.0.0.1:3001:80"
+
+  spring-app:
+    image: abdulrehman1793/shrimali-app:1.1
+    container_name: shrimali-sp
+    restart: always
+    ports:
+      - "127.0.0.1:3002:3005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
