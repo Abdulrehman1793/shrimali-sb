@@ -6,6 +6,7 @@ import com.shrimali.modules.member.dto.*;
 import com.shrimali.modules.member.mapper.MemberMapper;
 import com.shrimali.modules.member.services.MemberService;
 import com.shrimali.modules.shared.services.ImageUploadService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -181,7 +182,7 @@ public class MemberController {
     }
 
     @PutMapping("/father")
-    public ResponseEntity<Void> updateFatherDetails(Principal principal, @RequestBody FatherDetailsDTO dto) {
+    public ResponseEntity<Void> updateFatherDetails(Principal principal, @RequestBody DiscoverySearchRequest dto) {
         memberService.updateFatherDetails(principal, dto);
         return ResponseEntity.noContent().build();
     }
@@ -196,5 +197,14 @@ public class MemberController {
     public ResponseEntity<Void> updateSpouseDetails(Principal principal, @RequestBody SpouseDetailsDTO dto) {
         memberService.updateSpouseDetails(principal, dto);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/discovery")
+    public ResponseEntity<DiscoveryResponse> discoverMember(Principal principal, @Valid @RequestBody DiscoverySearchRequest request) {
+        log.info("Initiating member discovery for: {} {} ({})",
+                request.firstName(), request.lastName(), request.relationType());
+
+        DiscoveryResponse response = memberService.discoverExistingMember(principal, request);
+        return ResponseEntity.ok(response);
     }
 }

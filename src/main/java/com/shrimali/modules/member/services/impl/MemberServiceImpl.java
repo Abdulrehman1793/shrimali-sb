@@ -1,9 +1,12 @@
 package com.shrimali.modules.member.services.impl;
 
 import com.shrimali.dto.PagedResponse;
+import com.shrimali.exceptions.BadRequestException;
+import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.Role;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.auth.UserRole;
+import com.shrimali.model.enums.Gender;
 import com.shrimali.model.enums.RoleName;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberGotra;
@@ -12,10 +15,7 @@ import com.shrimali.modules.member.mapper.MemberMapper;
 import com.shrimali.modules.member.services.MemberService;
 import com.shrimali.modules.shared.services.AppUtils;
 import com.shrimali.modules.shared.services.EmailService;
-import com.shrimali.repositories.MemberGotraRepository;
-import com.shrimali.repositories.MemberRepository;
-import com.shrimali.repositories.RoleRepository;
-import com.shrimali.repositories.UserRepository;
+import com.shrimali.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,6 +41,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final EmailService emailService;
     private final MemberMapper memberMapper;
+    private final GotraRepository gotraRepository;
 
     @Override
     public PagedResponse<MemberListItem> findAll(String q, Pageable pageable) {
@@ -347,10 +348,12 @@ public class MemberServiceImpl implements MemberService {
     public void updateBasicInfo(Principal principal, BasicInfoDTO basicInfo) {
         Member member = getMember(principal);
 
-        if (basicInfo.getDob() != null) {
-            member.setDob(basicInfo.getDob());
-        }
 
+        Gotra gotra = gotraRepository.findById(basicInfo.getGotra())
+                .orElseThrow(() -> new BadRequestException("Gotra not found"));
+
+
+        member.setDob(basicInfo.getDob());
         member.setFirstName(basicInfo.getFirstName());
         member.setMiddleName(basicInfo.getMiddleName());
         member.setLastName(basicInfo.getLastName());
@@ -360,17 +363,33 @@ public class MemberServiceImpl implements MemberService {
         member.setEducation(basicInfo.getEducation());
         member.setNotes(basicInfo.getNotes());
         member.setKuldevi(basicInfo.getKuldevi());
+        member.setPaternalGotra(gotra);
+        member.setSpokenLanguages(basicInfo.getSpokenLanguages());
+        member.setSecondaryProfession(basicInfo.getSecondaryProfession());
 
         memberRepository.save(member);
     }
 
     @Override
     @Transactional
-    public void updateFatherDetails(Principal principal, FatherDetailsDTO dto) {
+    public void updateFatherDetails(Principal principal, DiscoverySearchRequest dto) {
+        User currentUser = getCurrentUser(principal);
+
         Member member = getMember(principal);
 
-        member.setPaternalVillage(dto.getPaternalVillage());
+        Member newMember = Member.builder()
+                .firstName(dto.firstName())
+                .middleName(dto.middleName())
+                .lastName(dto.lastName())
+                .dob(LocalDate.parse(dto.dob()))
+                .owner(currentUser)
+                .paternalGotra(member.getPaternalGotra())
+                .deceased(dto.deceased() != null ? dto.deceased() : false)
+                .build();
 
+        Member savedNewMember = memberRepository.save(newMember);
+
+        member.setFather(savedNewMember);
         memberRepository.save(member);
     }
 
@@ -390,6 +409,35 @@ public class MemberServiceImpl implements MemberService {
         member.setNaniyalVillage(dto.getNaniyalVillage());
 
         memberRepository.save(member);
+    }
+
+    @Override
+    public DiscoveryResponse discoverExistingMember(Principal principal, DiscoverySearchRequest request) {
+        // 1. Convert gender string to Enum
+        Gender searchGender = Gender.fromString(request.gender());
+
+        // 2. Parse Date
+        LocalDate birthDate = LocalDate.parse(request.dob());
+
+        // 3. Execute Search
+        return memberRepository.findFirstByFirstNameIgnoreCaseAndLastNameIgnoreCaseAndDobAndGender(
+                        request.firstName(),
+                        request.lastName(),
+                        birthDate,
+                        searchGender
+                )
+                .map(this::convertToResponse)
+                .orElse(new DiscoveryResponse(false, null));
+    }
+
+    private DiscoveryResponse convertToResponse(Member member) {
+        return new DiscoveryResponse(true, new DiscoveryResponse.MemberSummary(
+                member.getId(),
+                member.getFirstName(),
+                member.getLastName(),
+                member.getPaternalVillage(),
+                member.getPaternalGotra() != null ? member.getPaternalGotra().getName() : null
+        ));
     }
 
     private User getUser(Principal principal) {
@@ -460,6 +508,9 @@ public class MemberServiceImpl implements MemberService {
                 .kuldevi(m.getKuldevi())
                 .notes(m.getNotes())
                 .membershipNumber(m.getMembershipNumber())
+                .gotra(m.getPaternalGotra().getId())
+                .spokenLanguages(m.getSpokenLanguages())
+                .secondaryProfession(m.getSecondaryProfession())
                 .build();
     }
 

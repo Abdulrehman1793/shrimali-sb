@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -82,6 +83,10 @@ public class Member {
     private Gender gender;
     private LocalDate dob;
     private String profession;
+
+    @Column(name = "secondary_profession")
+    private String secondaryProfession;
+
     private String education;
 
     @Column(name = "marital_status")
@@ -109,6 +114,14 @@ public class Member {
 
     @Column(name = "photo_url")
     private String photoUrl;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "member_spoken_languages",
+            joinColumns = @JoinColumn(name = "member_id")
+    )
+    @Column(name = "language")
+    private Set<String> spokenLanguages = new HashSet<>();
 
     // --- Gotra Information ---
 

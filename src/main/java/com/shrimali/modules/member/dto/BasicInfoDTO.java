@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -25,10 +26,15 @@ public class BasicInfoDTO {
 
     private String photoUrl;
 
+    private Long gotra;
+
     private String maritalStatus;
     private String profession;
+    private String secondaryProfession;
     private String education;
     private String notes;
     private String kuldevi;
     private String membershipNumber;
+
+    private Set<String> spokenLanguages;
 }

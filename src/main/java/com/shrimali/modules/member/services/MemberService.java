@@ -32,9 +32,11 @@ public interface MemberService {
 
     void updateBasicInfo(Principal principal, BasicInfoDTO basicInfo);
 
-    void updateFatherDetails(Principal principal, FatherDetailsDTO dto);
+    void updateFatherDetails(Principal principal, DiscoverySearchRequest dto);
 
     void updateMotherDetails(Principal principal, MotherDetailsDTO dto);
 
     void updateSpouseDetails(Principal principal, SpouseDetailsDTO dto);
+
+    DiscoveryResponse discoverExistingMember(Principal principal, DiscoverySearchRequest request);
 }
