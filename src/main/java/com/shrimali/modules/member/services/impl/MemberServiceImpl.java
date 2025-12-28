@@ -332,7 +332,7 @@ public class MemberServiceImpl implements MemberService {
 
         return MemberProfileResponse.builder()
                 .basicInfo(mapToBasicInfo(member))
-                .father(mapToFather(member))
+                .father(mapToBasicInfo(member.getFather()))
                 .mother(mapToMother(member))
                 .spouse(mapToSpouse(member))
                 .metadata(ProfileMetadataDTO.builder()
@@ -496,6 +496,7 @@ public class MemberServiceImpl implements MemberService {
 
     private BasicInfoDTO mapToBasicInfo(Member m) {
         return BasicInfoDTO.builder()
+                .memberId(m.getId())
                 .firstName(m.getFirstName())
                 .middleName(m.getMiddleName())
                 .lastName(m.getLastName())
@@ -512,12 +513,6 @@ public class MemberServiceImpl implements MemberService {
                 .spokenLanguages(m.getSpokenLanguages())
                 .secondaryProfession(m.getSecondaryProfession())
                 .build();
-    }
-
-    private FatherDetailsDTO mapToFather(Member m) {
-        FatherDetailsDTO dto = new FatherDetailsDTO();
-        dto.setPaternalVillage(m.getPaternalVillage());
-        return dto;
     }
 
     private MotherDetailsDTO mapToMother(Member m) {

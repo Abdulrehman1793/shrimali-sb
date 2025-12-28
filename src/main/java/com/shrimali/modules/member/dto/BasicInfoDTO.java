@@ -15,6 +15,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BasicInfoDTO {
+    private Long memberId;
+
     private String firstName;
     private String middleName;
     private String lastName;

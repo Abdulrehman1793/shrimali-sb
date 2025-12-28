@@ -15,4 +15,6 @@ public interface MemberDiscoveryService {
      * Creates a brand-new member record and sets the user to "Waiting Room" status.
      */
     void registerNewMember(MemberDiscoveryDto dto);
+
+    void claimProfile(Long memberId);
 }

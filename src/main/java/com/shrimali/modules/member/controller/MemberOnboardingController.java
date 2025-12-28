@@ -54,4 +54,23 @@ public class MemberOnboardingController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    /**
+     * STEP 2 (Alternative): Claim Existing Profile
+     * Called when the user identifies an existing record as themselves ("This is Me").
+     * Links the current User to the existing Member record.
+     */
+    @PostMapping("/claim/{memberId}")
+    public ResponseEntity<Map<String, String>> claimProfile(@PathVariable Long memberId) {
+        log.info("Profile claim request for Member ID: {} by User: {}",
+                memberId, securityUtils.getCurrentUser().getUsername());
+
+        discoveryService.claimProfile(memberId);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Profile successfully claimed. Awaiting community approval.");
+        response.put("status", "AWAITING_COMMUNITY_APPROVAL");
+
+        return ResponseEntity.ok(response);
+    }
 }

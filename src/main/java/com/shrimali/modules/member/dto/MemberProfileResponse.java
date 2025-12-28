@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 public class MemberProfileResponse {
     private BasicInfoDTO basicInfo;
-    private FatherDetailsDTO father;
+    private BasicInfoDTO father;
     private MotherDetailsDTO mother;
     private SpouseDetailsDTO spouse;
     private ProfileMetadataDTO metadata;

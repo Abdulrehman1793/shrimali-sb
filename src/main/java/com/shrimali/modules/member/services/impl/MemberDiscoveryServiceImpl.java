@@ -39,8 +39,13 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
 
         return members.stream().map(m -> MemberMatchResponse.builder()
                         .memberId(m.getId())
-                        .fullName(m.getFirstName() + " " + m.getLastName())
-                        .fatherName(m.getFather() != null ? m.getFather().getFirstName() : "Unknown")
+                        .firstName(m.getFirstName())
+                        .middleName(m.getMiddleName())
+                        .lastName(m.getLastName())
+                        .gender(String.valueOf(m.getGender()))
+                        .photoUrl(m.getPhotoUrl())
+                        .dob(dto.getDob())
+                        .gotra(m.getPaternalGotra().getName())
                         .paternalVillage(m.getPaternalVillage())
                         .build())
                 .collect(Collectors.toList());
@@ -77,5 +82,34 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
 
         auditService.logAction("NEW_MEMBER_REQUEST",
                 "User requested new profile creation. Awaiting admin approval.");
+    }
+
+    @Override
+    @Transactional
+    public void claimProfile(Long memberId) {
+        User currentUser = securityUtils.getCurrentUser();
+
+        // Find the member record
+        Member existingMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BadRequestException("Profile not found"));
+
+        // Security Check: Ensure profile isn't already claimed by someone else
+        if (existingMember.getLinkedUser() != null) {
+            throw new BadRequestException("This profile has already been claimed.");
+        }
+
+        // 1. Link the profile to the current user
+        existingMember.setLinkedUser(currentUser);
+        existingMember.setOwner(currentUser);
+        existingMember.setMembershipStatus("PENDING_APPROVAL"); // Still requires admin check
+        memberRepository.save(existingMember);
+
+        // 2. Update User record
+        currentUser.setMemberId(existingMember.getId());
+        currentUser.setStatus(UserStatus.AWAITING_COMMUNITY_APPROVAL);
+        userRepository.save(currentUser);
+
+        auditService.logAction("PROFILE_CLAIM_REQUEST",
+                "User claimed existing profile ID: " + memberId);
     }
 }
