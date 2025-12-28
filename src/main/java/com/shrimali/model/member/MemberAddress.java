@@ -1,4 +1,4 @@
-package com.shrimali.model;
+package com.shrimali.model.member;
 
 import lombok.*;
 import jakarta.persistence.*;

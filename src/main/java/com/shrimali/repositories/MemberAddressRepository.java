@@ -1,7 +1,7 @@
 package com.shrimali.repositories;
 
-import com.shrimali.model.Member;
-import com.shrimali.model.MemberAddress;
+import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberAddress;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

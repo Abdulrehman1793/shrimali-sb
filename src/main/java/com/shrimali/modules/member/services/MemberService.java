@@ -1,7 +1,7 @@
 package com.shrimali.modules.member.services;
 
 import com.shrimali.dto.PagedResponse;
-import com.shrimali.model.Member;
+import com.shrimali.model.member.Member;
 import com.shrimali.modules.member.dto.*;
 import org.springframework.data.domain.Pageable;
 

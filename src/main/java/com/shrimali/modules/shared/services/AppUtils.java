@@ -1,9 +1,9 @@
 package com.shrimali.modules.shared.services;
 
-import com.shrimali.model.Member;
+import com.shrimali.model.member.Member;
 
 public class AppUtils {
-    public static int calculateCompletion(Member m) {
+    public static int calculateCompletion(com.shrimali.model.member.Member m) {
         int totalFields = 6;
         int filledFields = 0;
 

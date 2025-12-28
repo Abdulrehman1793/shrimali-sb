@@ -1,7 +1,7 @@
 package com.shrimali.repositories;
 
-import com.shrimali.model.Member;
 import com.shrimali.model.enums.RoleName;
+import com.shrimali.model.member.Member;
 import com.shrimali.modules.member.dto.MemberListItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

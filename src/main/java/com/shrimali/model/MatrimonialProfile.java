@@ -1,6 +1,7 @@
 package com.shrimali.model;
 
 import com.shrimali.model.auth.User;
+import com.shrimali.model.member.Member;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;

@@ -1,9 +1,9 @@
 package com.shrimali.modules.member.services.impl;
 
 import com.shrimali.exceptions.BadRequestException;
-import com.shrimali.model.Member;
-import com.shrimali.model.MemberContact;
 import com.shrimali.model.auth.User;
+import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberContact;
 import com.shrimali.modules.member.dto.ContactPayload;
 import com.shrimali.modules.member.services.MemberContactService;
 import com.shrimali.modules.shared.utils.AppConstant;

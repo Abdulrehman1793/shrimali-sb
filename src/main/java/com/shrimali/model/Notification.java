@@ -1,6 +1,7 @@
 package com.shrimali.model;
 
 import com.shrimali.model.auth.User;
+import com.shrimali.model.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 

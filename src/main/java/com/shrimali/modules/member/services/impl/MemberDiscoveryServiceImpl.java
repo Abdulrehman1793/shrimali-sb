@@ -1,8 +1,8 @@
 package com.shrimali.modules.member.services.impl;
 
-import com.shrimali.model.Member;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.UserStatus;
+import com.shrimali.model.member.Member;
 import com.shrimali.modules.member.dto.MemberDiscoveryDto;
 import com.shrimali.modules.member.dto.MemberMatchResponse;
 import com.shrimali.modules.member.services.MemberDiscoveryService;

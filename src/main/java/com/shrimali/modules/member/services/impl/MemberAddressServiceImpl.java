@@ -1,9 +1,9 @@
 package com.shrimali.modules.member.services.impl;
 
 import com.shrimali.exceptions.BadRequestException;
-import com.shrimali.model.Member;
-import com.shrimali.model.MemberAddress;
 import com.shrimali.model.auth.User;
+import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberAddress;
 import com.shrimali.modules.member.dto.MemberAddressPayload;
 import com.shrimali.modules.member.services.MemberAddressService;
 import com.shrimali.repositories.MemberAddressRepository;

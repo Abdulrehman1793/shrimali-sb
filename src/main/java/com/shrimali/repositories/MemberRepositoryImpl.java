@@ -3,6 +3,8 @@ package com.shrimali.repositories;
 import com.shrimali.model.*;
 import com.shrimali.model.auth.*;
 import com.shrimali.model.enums.RoleName;
+import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberGotra;
 import com.shrimali.modules.member.dto.MemberListItem;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.*;

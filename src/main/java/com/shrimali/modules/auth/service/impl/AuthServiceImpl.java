@@ -1,11 +1,11 @@
 package com.shrimali.modules.auth.service.impl;
 
 import com.shrimali.exceptions.BadRequestException;
-import com.shrimali.model.Member;
 import com.shrimali.model.auth.Otp;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.AuthProviderType;
 import com.shrimali.model.enums.RoleName;
+import com.shrimali.model.member.Member;
 import com.shrimali.modules.auth.dto.*;
 import com.shrimali.modules.auth.service.AuthService;
 import com.shrimali.modules.auth.service.security.JwtUtil;

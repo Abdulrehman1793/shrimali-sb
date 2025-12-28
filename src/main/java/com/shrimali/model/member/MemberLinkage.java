@@ -1,4 +1,4 @@
-package com.shrimali.model;
+package com.shrimali.model.member;
 
 import com.shrimali.model.enums.RelationshipType;
 import jakarta.persistence.*;

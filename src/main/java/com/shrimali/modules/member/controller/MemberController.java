@@ -1,7 +1,7 @@
 package com.shrimali.modules.member.controller;
 
 import com.shrimali.dto.PagedResponse;
-import com.shrimali.model.Member;
+import com.shrimali.model.member.Member;
 import com.shrimali.modules.member.dto.*;
 import com.shrimali.modules.member.mapper.MemberMapper;
 import com.shrimali.modules.member.services.MemberService;

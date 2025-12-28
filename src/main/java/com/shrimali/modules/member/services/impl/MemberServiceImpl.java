@@ -1,13 +1,12 @@
 package com.shrimali.modules.member.services.impl;
 
 import com.shrimali.dto.PagedResponse;
-import com.shrimali.model.Member;
-import com.shrimali.model.MemberGotra;
 import com.shrimali.model.auth.Role;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.auth.UserRole;
-import com.shrimali.model.enums.MemberShipStatus;
 import com.shrimali.model.enums.RoleName;
+import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberGotra;
 import com.shrimali.modules.member.dto.*;
 import com.shrimali.modules.member.mapper.MemberMapper;
 import com.shrimali.modules.member.services.MemberService;

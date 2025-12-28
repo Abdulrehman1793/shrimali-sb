@@ -1,4 +1,4 @@
-package com.shrimali.model;
+package com.shrimali.model.member;
 
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.ClaimStatus;

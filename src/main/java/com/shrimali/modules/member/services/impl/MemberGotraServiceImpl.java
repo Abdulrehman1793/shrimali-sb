@@ -1,9 +1,9 @@
 package com.shrimali.modules.member.services.impl;
 
 import com.shrimali.model.Gotra;
-import com.shrimali.model.Member;
-import com.shrimali.model.MemberGotra;
 import com.shrimali.model.auth.User;
+import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberGotra;
 import com.shrimali.modules.member.dto.GotraDTO;
 import com.shrimali.modules.member.dto.MemberGotraDTO;
 import com.shrimali.modules.member.services.MemberGotraService;

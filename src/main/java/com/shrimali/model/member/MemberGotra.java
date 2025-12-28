@@ -1,5 +1,6 @@
-package com.shrimali.model;
+package com.shrimali.model.member;
 
+import com.shrimali.model.Gotra;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;

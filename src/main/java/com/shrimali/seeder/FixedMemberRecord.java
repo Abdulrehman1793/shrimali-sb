@@ -1,7 +1,6 @@
 package com.shrimali.seeder;
 
-import com.shrimali.model.Member;
-import com.shrimali.modules.shared.services.AppUtils;
+import com.shrimali.model.member.Member;
 import com.shrimali.repositories.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

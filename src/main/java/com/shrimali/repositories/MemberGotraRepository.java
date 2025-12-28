@@ -1,6 +1,6 @@
 package com.shrimali.repositories;
 
-import com.shrimali.model.MemberGotra;
+import com.shrimali.model.member.MemberGotra;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -1,7 +1,7 @@
 package com.shrimali.modules.member.mapper;
 
-import com.shrimali.model.Member;
-import com.shrimali.model.MemberAddress;
+import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberAddress;
 import com.shrimali.modules.member.dto.MemberResponse;
 import org.springframework.stereotype.Service;
 

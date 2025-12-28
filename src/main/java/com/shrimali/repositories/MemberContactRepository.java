@@ -1,6 +1,6 @@
 package com.shrimali.repositories;
 
-import com.shrimali.model.MemberContact;
+import com.shrimali.model.member.MemberContact;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
