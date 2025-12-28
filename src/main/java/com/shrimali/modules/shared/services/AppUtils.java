@@ -14,7 +14,7 @@ public class AppUtils {
         if (isNotBlank(m.getEducation())) filledFields++;
 
         if (m.getDob() != null) filledFields++;
-        if (isNotBlank(m.getGender())) filledFields++;
+        if (m.getGender() != null) filledFields++;
 
         if (isNotBlank(m.getPaternalVillage())) filledFields++;
         totalFields += 1;

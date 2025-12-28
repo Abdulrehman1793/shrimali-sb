@@ -2,6 +2,7 @@ package com.shrimali.model.member;
 
 import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.User;
+import com.shrimali.model.enums.Gender;
 import lombok.*;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -77,7 +78,8 @@ public class Member {
     private LocalDate marriageDate;
 
     // --- Other Fields ---
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
     private LocalDate dob;
     private String profession;
     private String education;

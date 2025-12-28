@@ -1,5 +1,7 @@
 package com.shrimali.modules.member.services.impl;
 
+import com.shrimali.exceptions.BadRequestException;
+import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.UserStatus;
 import com.shrimali.model.member.Member;
@@ -8,6 +10,7 @@ import com.shrimali.modules.member.dto.MemberMatchResponse;
 import com.shrimali.modules.member.services.MemberDiscoveryService;
 import com.shrimali.modules.shared.services.AuditService;
 import com.shrimali.modules.shared.services.SecurityUtils;
+import com.shrimali.repositories.GotraRepository;
 import com.shrimali.repositories.MemberRepository;
 import com.shrimali.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -24,6 +27,8 @@ import java.util.stream.Collectors;
 public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final GotraRepository gotraRepository;
+
     private final AuditService auditService;
     private final SecurityUtils securityUtils;
 
@@ -46,6 +51,9 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
     public void registerNewMember(MemberDiscoveryDto dto) {
         User currentUser = securityUtils.getCurrentUser(); // Helper to get logged-in user
 
+        Gotra gotra = gotraRepository.findById(dto.getGotra())
+                .orElseThrow(() -> new BadRequestException("Gotra not found"));
+
         // 1. Create the Member Profile
         Member newMember = Member.builder()
                 .firstName(dto.getFirstName())
@@ -54,6 +62,7 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
                 .dob(dto.getDob())
                 .paternalVillage(dto.getPaternalVillage())
                 .gender(dto.getGender())
+                .paternalGotra(gotra)
                 .owner(currentUser)      // User manages themselves
                 .linkedUser(currentUser) // User IS this person
                 .membershipStatus("PENDING_APPROVAL") // The Gatekeeper

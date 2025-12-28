@@ -1,5 +1,6 @@
 package com.shrimali.modules.member.dto;
 
+import com.shrimali.model.enums.Gender;
 import com.shrimali.model.enums.MemberShipStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +17,7 @@ public class MemberResponse {
     private String firstName;
     private String middleName;
     private String lastName;
-    private String gender;
+    private Gender gender;
     private String dob; // ISO date string
     private String membershipType;
     private String membershipStatus;

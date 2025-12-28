@@ -1,6 +1,5 @@
 package com.shrimali.modules.member.services;
 
-import com.shrimali.model.Member;
 import com.shrimali.modules.member.dto.MemberDiscoveryDto;
 import com.shrimali.modules.member.dto.MemberMatchResponse;
 

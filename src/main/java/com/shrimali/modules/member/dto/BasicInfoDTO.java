@@ -1,5 +1,6 @@
 package com.shrimali.modules.member.dto;
 
+import com.shrimali.model.enums.Gender;
 import com.shrimali.model.enums.RoleName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +17,7 @@ public class BasicInfoDTO {
     private String firstName;
     private String middleName;
     private String lastName;
-    private String gender;
+    private Gender gender;
     private LocalDate dob;
     private String email;
 

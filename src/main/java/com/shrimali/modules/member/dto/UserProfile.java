@@ -1,5 +1,6 @@
 package com.shrimali.modules.member.dto;
 
+import com.shrimali.model.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ public class UserProfile {
     private String firstName;
     private String middleName;
     private String lastName;
-    private String gender;
+    private Gender gender;
     private LocalDate dob;
     private String email;
     private String phone;

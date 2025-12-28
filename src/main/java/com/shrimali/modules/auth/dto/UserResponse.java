@@ -1,5 +1,6 @@
 package com.shrimali.modules.auth.dto;
 
+import com.shrimali.model.enums.Gender;
 import com.shrimali.model.enums.RoleName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +21,7 @@ public class UserResponse {
     private String phone;
     private Boolean phoneVerified;
 
-    private String gender;
+    private Gender gender;
     private String dob;
 
     private RoleName role;
