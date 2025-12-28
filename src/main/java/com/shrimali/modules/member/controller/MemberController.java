@@ -182,20 +182,20 @@ public class MemberController {
     }
 
     @PutMapping("/father")
-    public ResponseEntity<Void> updateFatherDetails(Principal principal, @RequestBody DiscoverySearchRequest dto) {
-        memberService.updateFatherDetails(principal, dto);
+    public ResponseEntity<Void> updateFatherDetails(@RequestBody DiscoverySearchRequest dto) {
+        memberService.updateFatherDetails(dto);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/mother")
-    public ResponseEntity<Void> updateMotherDetails(Principal principal, @RequestBody MotherDetailsDTO dto) {
-        memberService.updateMotherDetails(principal, dto);
+    public ResponseEntity<Void> updateMotherDetails(@RequestBody DiscoverySearchRequest dto) {
+        memberService.updateMotherDetails(dto);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/spouse")
-    public ResponseEntity<Void> updateSpouseDetails(Principal principal, @RequestBody SpouseDetailsDTO dto) {
-        memberService.updateSpouseDetails(principal, dto);
+    public ResponseEntity<Void> updateSpouseDetails(@RequestBody DiscoverySearchRequest dto) {
+        memberService.updateSpouseDetails(dto);
         return ResponseEntity.noContent().build();
     }
 

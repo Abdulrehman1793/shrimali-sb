@@ -11,5 +11,6 @@ public record DiscoverySearchRequest(
         @NotBlank String gender,
         @NotBlank String relationType,
         String paternalVillage,
+        String naniyalVillage,
         Boolean deceased
 ) {}

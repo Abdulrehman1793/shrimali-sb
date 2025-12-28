@@ -66,6 +66,7 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
                 .lastName(dto.getLastName())
                 .dob(dto.getDob())
                 .paternalVillage(dto.getPaternalVillage())
+                .naniyalVillage(dto.getNaniyalVillage())
                 .gender(dto.getGender())
                 .paternalGotra(gotra)
                 .owner(currentUser)      // User manages themselves

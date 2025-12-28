@@ -39,4 +39,6 @@ public class BasicInfoDTO {
     private String membershipNumber;
 
     private Set<String> spokenLanguages;
+
+    private Boolean owner;
 }

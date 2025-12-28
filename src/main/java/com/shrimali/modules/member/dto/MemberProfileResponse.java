@@ -8,7 +8,7 @@ import lombok.Data;
 public class MemberProfileResponse {
     private BasicInfoDTO basicInfo;
     private BasicInfoDTO father;
-    private MotherDetailsDTO mother;
-    private SpouseDetailsDTO spouse;
+    private BasicInfoDTO mother;
+    private BasicInfoDTO spouse;
     private ProfileMetadataDTO metadata;
 }

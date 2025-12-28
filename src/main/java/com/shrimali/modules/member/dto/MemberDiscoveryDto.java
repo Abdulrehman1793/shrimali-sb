@@ -36,6 +36,8 @@ public class MemberDiscoveryDto {
 
     private String paternalVillage;
 
+    private String naniyalVillage;
+
     private Long gotra;
 
     @NotNull(message = "Gender is required")

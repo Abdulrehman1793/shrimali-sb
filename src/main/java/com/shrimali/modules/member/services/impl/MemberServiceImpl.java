@@ -15,6 +15,7 @@ import com.shrimali.modules.member.mapper.MemberMapper;
 import com.shrimali.modules.member.services.MemberService;
 import com.shrimali.modules.shared.services.AppUtils;
 import com.shrimali.modules.shared.services.EmailService;
+import com.shrimali.modules.shared.services.SecurityUtils;
 import com.shrimali.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,7 @@ public class MemberServiceImpl implements MemberService {
     private final EmailService emailService;
     private final MemberMapper memberMapper;
     private final GotraRepository gotraRepository;
+    private final SecurityUtils securityUtils;
 
     @Override
     public PagedResponse<MemberListItem> findAll(String q, Pageable pageable) {
@@ -330,17 +333,26 @@ public class MemberServiceImpl implements MemberService {
             gotra = gotras.getFirst().getGotra().getName();
         }
 
-        return MemberProfileResponse.builder()
+        MemberProfileResponse memberProfileResponse = MemberProfileResponse.builder()
                 .basicInfo(mapToBasicInfo(member))
-                .father(mapToBasicInfo(member.getFather()))
-                .mother(mapToMother(member))
-                .spouse(mapToSpouse(member))
-                .metadata(ProfileMetadataDTO.builder()
+                .build();
+        if (member.getFather() != null)
+            memberProfileResponse.setFather(mapToBasicInfo(member.getFather()));
+
+        if (member.getMother() != null)
+            memberProfileResponse.setMother(mapToBasicInfo(member.getMother()));
+
+        if (member.getSpouse() != null)
+            memberProfileResponse.setSpouse(mapToBasicInfo(member.getSpouse()));
+
+        memberProfileResponse.setMetadata(
+                ProfileMetadataDTO.builder()
                         .membershipStatus(member.getMembershipStatus() == null ? null : member.getMembershipStatus())
                         .completionPercentage(AppUtils.calculateCompletion(member))
                         .gotra(gotra)
-                        .build())
-                .build();
+                        .build()
+        );
+        return memberProfileResponse;
     }
 
     @Override
@@ -372,10 +384,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void updateFatherDetails(Principal principal, DiscoverySearchRequest dto) {
-        User currentUser = getCurrentUser(principal);
+    public void updateFatherDetails(DiscoverySearchRequest dto) {
+        User currentUser = securityUtils.getCurrentUser();
 
-        Member member = getMember(principal);
+        Member member = getMember(currentUser);
 
         Member newMember = Member.builder()
                 .firstName(dto.firstName())
@@ -383,6 +395,11 @@ public class MemberServiceImpl implements MemberService {
                 .lastName(dto.lastName())
                 .dob(LocalDate.parse(dto.dob()))
                 .owner(currentUser)
+                .gender(Gender.Male)
+                .maritalStatus("married")
+                .membershipStatus("PENDING_APPROVAL")
+                .paternalVillage(dto.paternalVillage())
+                .naniyalVillage(dto.naniyalVillage())
                 .paternalGotra(member.getPaternalGotra())
                 .deceased(dto.deceased() != null ? dto.deceased() : false)
                 .build();
@@ -395,19 +412,57 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public void updateSpouseDetails(Principal principal, SpouseDetailsDTO dto) {
-        Member member = getMember(principal);
+    public void updateSpouseDetails(DiscoverySearchRequest dto) {
+        User currentUser = securityUtils.getCurrentUser();
 
+        Member member = getMember(currentUser);
+
+        Member newMember = Member.builder()
+                .firstName(dto.firstName())
+                .middleName(dto.middleName())
+                .lastName(dto.lastName())
+                .dob(LocalDate.parse(dto.dob()))
+                .owner(currentUser)
+                .gender(Gender.Female)
+                .maritalStatus("married")
+                .membershipStatus("PENDING_APPROVAL")
+                .paternalVillage(dto.paternalVillage())
+                .naniyalVillage(dto.naniyalVillage())
+                .paternalGotra(member.getPaternalGotra())
+                .deceased(dto.deceased() != null ? dto.deceased() : false)
+                .build();
+
+        Member savedNewMember = memberRepository.save(newMember);
+
+        member.setSpouse(savedNewMember);
         memberRepository.save(member);
     }
 
     @Override
     @Transactional
-    public void updateMotherDetails(Principal principal, MotherDetailsDTO dto) {
-        Member member = getMember(principal);
+    public void updateMotherDetails(DiscoverySearchRequest dto) {
+        User currentUser = securityUtils.getCurrentUser();
 
-        member.setNaniyalVillage(dto.getNaniyalVillage());
+        Member member = getMember(currentUser);
 
+        Member newMember = Member.builder()
+                .firstName(dto.firstName())
+                .middleName(dto.middleName())
+                .lastName(dto.lastName())
+                .dob(LocalDate.parse(dto.dob()))
+                .owner(currentUser)
+                .gender(Gender.Female)
+                .maritalStatus("married")
+                .membershipStatus("PENDING_APPROVAL")
+                .paternalVillage(dto.paternalVillage())
+                .naniyalVillage(dto.naniyalVillage())
+                .paternalGotra(member.getPaternalGotra())
+                .deceased(dto.deceased() != null ? dto.deceased() : false)
+                .build();
+
+        Member savedNewMember = memberRepository.save(newMember);
+
+        member.setMother(savedNewMember);
         memberRepository.save(member);
     }
 
@@ -446,6 +501,14 @@ public class MemberServiceImpl implements MemberService {
 
     private Member getMember(Principal principal) {
         User currentUser = getCurrentUser(principal);
+        Long memberId = currentUser.getMemberId();
+
+        return memberRepository.findById(memberId)
+                .orElseThrow(() ->
+                        new NoSuchElementException("Member not found with id: " + memberId));
+    }
+
+    private Member getMember(User currentUser) {
         Long memberId = currentUser.getMemberId();
 
         return memberRepository.findById(memberId)
@@ -512,6 +575,7 @@ public class MemberServiceImpl implements MemberService {
                 .gotra(m.getPaternalGotra().getId())
                 .spokenLanguages(m.getSpokenLanguages())
                 .secondaryProfession(m.getSecondaryProfession())
+                .owner(Objects.equals(m.getOwner().getId(), securityUtils.getCurrentUser().getId()))
                 .build();
     }
 
