@@ -194,6 +194,7 @@ public class AuthServiceImpl implements AuthService {
                 .phone(user.getPhone())
                 .dob(member.getDob() != null ? member.getDob().toString() : null)
                 .role(role)
+                .status(user.getStatus())
                 .completionPercentage(AppUtils.calculateCompletion(member))
                 .build();
     }

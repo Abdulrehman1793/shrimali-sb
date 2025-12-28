@@ -5,6 +5,7 @@ import com.shrimali.modules.member.dto.MemberDiscoveryDto;
 import com.shrimali.modules.member.dto.MemberMatchResponse;
 import com.shrimali.modules.member.services.MemberDiscoveryService;
 import com.shrimali.modules.shared.services.SecurityUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class MemberOnboardingController {
      * Sets status to PENDING_APPROVAL.
      */
     @PostMapping("/new")
-    public ResponseEntity<Map<String, String>> registerNewMember(@RequestBody MemberDiscoveryDto dto) {
+    public ResponseEntity<Map<String, String>> registerNewMember(@Valid @RequestBody MemberDiscoveryDto dto) {
         User currentUser = securityUtils.getCurrentUser();
 
         log.info("New member registration request for: {} {}", dto.getFirstName(), dto.getLastName());

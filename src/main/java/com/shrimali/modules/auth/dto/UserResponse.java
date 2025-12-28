@@ -2,6 +2,7 @@ package com.shrimali.modules.auth.dto;
 
 import com.shrimali.model.enums.Gender;
 import com.shrimali.model.enums.RoleName;
+import com.shrimali.model.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +28,8 @@ public class UserResponse {
     private RoleName role;
 
     private String photoUrl;
+
+    private UserStatus status;
 
     private boolean completed;
     private int completionPercentage;
