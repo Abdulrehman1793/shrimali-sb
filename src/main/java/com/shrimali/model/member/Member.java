@@ -84,6 +84,9 @@ public class Member {
     private LocalDate dob;
     private String profession;
 
+    @Column(name = "blood_group")
+    private String bloodGroup;
+
     @Column(name = "secondary_profession")
     private String secondaryProfession;
 

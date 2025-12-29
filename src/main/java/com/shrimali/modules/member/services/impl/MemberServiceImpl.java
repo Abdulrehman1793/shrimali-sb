@@ -360,7 +360,6 @@ public class MemberServiceImpl implements MemberService {
     public void updateBasicInfo(Principal principal, BasicInfoDTO basicInfo) {
         Member member = getMember(principal);
 
-
         Gotra gotra = gotraRepository.findById(basicInfo.getGotra())
                 .orElseThrow(() -> new BadRequestException("Gotra not found"));
 
@@ -378,6 +377,9 @@ public class MemberServiceImpl implements MemberService {
         member.setPaternalGotra(gotra);
         member.setSpokenLanguages(basicInfo.getSpokenLanguages());
         member.setSecondaryProfession(basicInfo.getSecondaryProfession());
+        member.setBloodGroup(basicInfo.getBloodGroup());
+        member.setPaternalVillage(basicInfo.getPaternalVillage());
+        member.setNaniyalVillage(basicInfo.getNaniyalVillage());
 
         memberRepository.save(member);
     }
@@ -576,6 +578,9 @@ public class MemberServiceImpl implements MemberService {
                 .spokenLanguages(m.getSpokenLanguages())
                 .secondaryProfession(m.getSecondaryProfession())
                 .owner(Objects.equals(m.getOwner().getId(), securityUtils.getCurrentUser().getId()))
+                .bloodGroup(m.getBloodGroup())
+                .paternalVillage(m.getPaternalVillage())
+                .naniyalVillage(m.getNaniyalVillage())
                 .build();
     }
 

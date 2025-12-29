@@ -30,6 +30,7 @@ public class BasicInfoDTO {
 
     private Long gotra;
 
+    private String bloodGroup;
     private String maritalStatus;
     private String profession;
     private String secondaryProfession;
@@ -37,6 +38,9 @@ public class BasicInfoDTO {
     private String notes;
     private String kuldevi;
     private String membershipNumber;
+
+    private String paternalVillage;
+    private String naniyalVillage;
 
     private Set<String> spokenLanguages;
 
