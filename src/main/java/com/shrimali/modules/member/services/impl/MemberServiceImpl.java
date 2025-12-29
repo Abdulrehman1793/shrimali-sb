@@ -355,6 +355,16 @@ public class MemberServiceImpl implements MemberService {
             );
         }
 
+        if (member.getContacts() != null) {
+            memberProfileResponse.setContacts(
+                    member.getContacts().stream()
+                            .map(c ->
+                                    new ContactPayload(c.getType(), c.getIsPrimary(), c.getValue())
+                            )
+                            .toList()
+            );
+        }
+
         memberProfileResponse.setMetadata(
                 ProfileMetadataDTO.builder()
                         .membershipStatus(member.getMembershipStatus() == null ? null : member.getMembershipStatus())

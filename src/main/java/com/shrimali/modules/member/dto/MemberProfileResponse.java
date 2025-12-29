@@ -13,5 +13,6 @@ public class MemberProfileResponse {
     private BasicInfoDTO mother;
     private BasicInfoDTO spouse;
     private List<MemberAddressPayload> addresses;
+    private List<ContactPayload> contacts;
     private ProfileMetadataDTO metadata;
 }
