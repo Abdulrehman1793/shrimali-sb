@@ -11,6 +11,7 @@ import com.shrimali.model.enums.RoleName;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberGotra;
 import com.shrimali.modules.member.dto.*;
+import com.shrimali.modules.member.mapper.MemberAddressMapper;
 import com.shrimali.modules.member.mapper.MemberMapper;
 import com.shrimali.modules.member.services.MemberService;
 import com.shrimali.modules.shared.services.AppUtils;
@@ -19,6 +20,7 @@ import com.shrimali.modules.shared.services.SecurityUtils;
 import com.shrimali.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -344,6 +346,14 @@ public class MemberServiceImpl implements MemberService {
 
         if (member.getSpouse() != null)
             memberProfileResponse.setSpouse(mapToBasicInfo(member.getSpouse()));
+
+        if (member.getAddresses() != null) {
+            memberProfileResponse.setAddresses(
+                    member.getAddresses().stream()
+                            .map(MemberAddressMapper::toPayload)
+                            .toList()
+            );
+        }
 
         memberProfileResponse.setMetadata(
                 ProfileMetadataDTO.builder()

@@ -15,7 +15,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "members")
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -156,11 +157,13 @@ public class Member {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MemberContact> contacts;
+    private Set<MemberContact> contacts = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MemberAddress> addresses;
+    private Set<MemberAddress> addresses = new HashSet<>();
 
     // --- Logic for Membership Number ---
     @PrePersist

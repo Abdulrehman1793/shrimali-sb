@@ -24,12 +24,10 @@ public class MemberAddressController {
 
     /* -------------------- LIST ADDRESSES -------------------- */
     @GetMapping
-    public ResponseEntity<List<MemberAddressPayload>> listAddresses(
-            Principal principal
-    ) {
+    public ResponseEntity<List<MemberAddressPayload>> listAddresses() {
         log.debug("Fetching member addresses");
         return ResponseEntity.ok(
-                memberAddressService.list(principal)
+                memberAddressService.list()
         );
     }
 
@@ -66,7 +64,7 @@ public class MemberAddressController {
             @PathVariable String addressType
     ) {
         log.debug("Deleting address of type: {}", addressType);
-        memberAddressService.remove(principal, addressType);
+        memberAddressService.remove(addressType);
         return ResponseEntity.ok(
                 Map.of("message", "Address deleted successfully")
         );

@@ -3,6 +3,8 @@ package com.shrimali.modules.member.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class MemberProfileResponse {
@@ -10,5 +12,6 @@ public class MemberProfileResponse {
     private BasicInfoDTO father;
     private BasicInfoDTO mother;
     private BasicInfoDTO spouse;
+    private List<MemberAddressPayload> addresses;
     private ProfileMetadataDTO metadata;
 }

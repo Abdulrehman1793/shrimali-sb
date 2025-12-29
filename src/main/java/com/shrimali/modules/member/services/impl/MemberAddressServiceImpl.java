@@ -5,7 +5,9 @@ import com.shrimali.model.auth.User;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberAddress;
 import com.shrimali.modules.member.dto.MemberAddressPayload;
+import com.shrimali.modules.member.mapper.MemberAddressMapper;
 import com.shrimali.modules.member.services.MemberAddressService;
+import com.shrimali.modules.shared.services.SecurityUtils;
 import com.shrimali.repositories.MemberAddressRepository;
 import com.shrimali.repositories.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,14 +29,17 @@ public class MemberAddressServiceImpl implements MemberAddressService {
     private final MemberRepository memberRepository;
     private final MemberAddressRepository addressRepository;
 
+    private final SecurityUtils securityUtils;
+
     @Override
     @Transactional(readOnly = true)
-    public List<MemberAddressPayload> list(Principal principal) {
-        Member member = getMember(principal);
+    public List<MemberAddressPayload> list() {
+        User currentUser = securityUtils.getCurrentUser();
+        Member member = getMember(currentUser);
 
         return addressRepository.findByMember(member)
                 .stream()
-                .map(this::toPayload)
+                .map(MemberAddressMapper::toPayload)
                 .toList();
     }
 
@@ -92,8 +97,10 @@ public class MemberAddressServiceImpl implements MemberAddressService {
     }
 
     @Override
-    public void remove(Principal principal, String type) {
-        Member member = getMember(principal);
+    @Transactional
+    public void remove(String type) {
+        User currentUser = securityUtils.getCurrentUser();
+        Member member = getMember(currentUser);
 
         if (type.equalsIgnoreCase("CURRENT")) {
             throw new IllegalStateException("Current address cannot be deleted");
@@ -101,13 +108,11 @@ public class MemberAddressServiceImpl implements MemberAddressService {
 
         MemberAddress address = addressRepository
                 .findByMemberAndAddressType(member, type)
-                .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "Address of type " + type + " not found"
-                        )
-                );
+                .orElseThrow(() -> new EntityNotFoundException("Address type " + type + " not found"));
 
-        addressRepository.delete(address);
+        member.getAddresses().remove(address);
+
+        address.setMember(null);
     }
 
     /* -------------------- HELPERS -------------------- */
@@ -123,17 +128,10 @@ public class MemberAddressServiceImpl implements MemberAddressService {
                 );
     }
 
-    private MemberAddressPayload toPayload(MemberAddress address) {
-        return MemberAddressPayload.builder()
-                .addressType(address.getAddressType())
-                .line1(address.getLine1())
-                .line2(address.getLine2())
-                .areaLocality(address.getAreaLocality())
-                .city(address.getCity())
-                .district(address.getDistrict())
-                .state(address.getState())
-                .country(address.getCountry())
-                .pincode(address.getPincode())
-                .build();
+    private Member getMember(User user) {
+        return memberRepository.findById(user.getMemberId())
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Member not found")
+                );
     }
 }

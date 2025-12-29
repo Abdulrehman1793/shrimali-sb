@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class MemberAddressPayload {
+    private Long id;
 
     @NotBlank
     private String addressType; // CURRENT / PERMANENT

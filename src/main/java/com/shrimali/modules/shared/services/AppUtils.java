@@ -27,8 +27,15 @@ public class AppUtils {
         total++; if (isNotBlank(m.getProfession())) filled++;
 
         // 4. Contact & Location (Checking collections)
-        total++; if (m.getContacts() != null && !m.getContacts().isEmpty()) filled++;
-        total++; if (m.getAddresses() != null && !m.getAddresses().isEmpty()) filled++;
+        var addresses = m.getAddresses();
+        if (addresses != null && !addresses.isEmpty()) {
+            filled++;
+        }
+
+        var contacts = m.getContacts();
+        if (contacts != null && !contacts.isEmpty()) {
+            filled++;
+        }
 
         // 5. Conditional Logic for Married Members
         // If married, we expect Spouse and Marriage Date to be filled
