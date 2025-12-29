@@ -1,32 +1,49 @@
 package com.shrimali.modules.shared.services;
 
+
 import com.shrimali.model.member.Member;
 
 public class AppUtils {
-    public static int calculateCompletion(com.shrimali.model.member.Member m) {
-        int totalFields = 6;
-        int filledFields = 0;
+    public static int calculateCompletion(Member m) {
+        if (m == null) return 0;
 
-        if (isNotBlank(m.getFirstName())) filledFields++;
-        if (isNotBlank(m.getMiddleName())) filledFields++;
-        if (isNotBlank(m.getLastName())) filledFields++;
-        if (isNotBlank(m.getProfession())) filledFields++;
-        if (isNotBlank(m.getEducation())) filledFields++;
+        int filled = 0;
+        int total = 0;
 
-        if (m.getDob() != null) filledFields++;
-        if (m.getGender() != null) filledFields++;
+        // 1. Basic Identity (Core)
+        total++; if (isNotBlank(m.getFirstName())) filled++;
+        total++; if (isNotBlank(m.getLastName())) filled++;
+        total++; if (m.getGender() != null) filled++;
+        total++; if (m.getDob() != null) filled++;
 
-        if (isNotBlank(m.getPaternalVillage())) filledFields++;
-        totalFields += 1;
+        // 2. Social & Ancestral
+        total++; if (m.getPaternalGotra() != null) filled++;
+        total++; if (isNotBlank(m.getPaternalVillage())) filled++;
+        total++; if (isNotBlank(m.getNaniyalVillage())) filled++;
+        total++; if (m.getMaternalGotra() != null) filled++;
 
-        if (isNotBlank(m.getNaniyalVillage())) filledFields++;
-        totalFields += 1;
+        // 3. Professional
+        total++; if (isNotBlank(m.getEducation())) filled++;
+        total++; if (isNotBlank(m.getProfession())) filled++;
 
-        if ("married".equalsIgnoreCase(m.getMaritalStatus())) {
-            totalFields += 3;
+        // 4. Contact & Location (Checking collections)
+        total++; if (m.getContacts() != null && !m.getContacts().isEmpty()) filled++;
+        total++; if (m.getAddresses() != null && !m.getAddresses().isEmpty()) filled++;
+
+        // 5. Conditional Logic for Married Members
+        // If married, we expect Spouse and Marriage Date to be filled
+        if ("Married".equalsIgnoreCase(m.getMaritalStatus())) {
+            total++; if (m.getSpouse() != null) filled++;
+            total++; if (m.getMarriageDate() != null) filled++;
+        } else {
+            // If not married, marital status itself still counts as a data point
+            total++; if (isNotBlank(m.getMaritalStatus())) filled++;
         }
 
-        return (filledFields * 100) / totalFields;
+        // 6. Media
+        total++; if (isNotBlank(m.getPhotoUrl())) filled++;
+
+        return (filled * 100) / total;
     }
 
     private static boolean isNotBlank(String s) {
