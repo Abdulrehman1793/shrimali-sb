@@ -44,4 +44,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
             @Param("ln") String ln,
             @Param("dob") LocalDate dob,
             @Param("village") String village);
+
+    List<Member> findByOwnerId(Long ownerUserId);
 }

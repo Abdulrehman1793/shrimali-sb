@@ -22,4 +22,6 @@ public interface AuthService {
     UserResponse me(Principal principal);
 
     AuthResponse generateToken(Principal principal);
+
+    void removeAccount();
 }

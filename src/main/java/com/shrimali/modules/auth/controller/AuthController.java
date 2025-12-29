@@ -81,4 +81,19 @@ public class AuthController {
         AuthResponse authResponse = authService.generateToken(principal);
         return ResponseEntity.ok(authResponse);
     }
+
+    @PostMapping("/delete")
+    public ResponseEntity<Void> removeAccount(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+        authService.removeAccount();
+        return ResponseEntity.noContent().build();
+    }
 }

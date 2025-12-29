@@ -13,18 +13,20 @@ import com.shrimali.modules.auth.service.OtpService;
 import com.shrimali.modules.auth.service.UserRegistrationService;
 import com.shrimali.modules.shared.services.AppUtils;
 import com.shrimali.modules.shared.services.EmailService;
-import com.shrimali.repositories.MemberRepository;
-import com.shrimali.repositories.UserRepository;
+import com.shrimali.modules.shared.services.SecurityUtils;
+import com.shrimali.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -35,11 +37,15 @@ public class AuthServiceImpl implements AuthService {
 
     private final PasswordEncoder passwordEncoder;
     private final OtpService otpService;
+    private final SecurityUtils securityUtils;
 
     private final UserRegistrationService userRegistrationService;
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
+    private final AuditLogRepository auditLogRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final UserSocialAccountRepository userSocialAccountRepository;
 
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
@@ -206,6 +212,42 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateToken(user.getUsername());
         return new AuthResponse(
                 new TokenResponse(token));
+    }
+
+    @Transactional
+    @Override
+    public void removeAccount() {
+        User currentUser = securityUtils.getCurrentUser();
+        Long userId = currentUser.getId();
+
+        // 1. Identify all members created by this user
+        List<Member> ownedMembers = memberRepository.findByOwnerId(userId);
+
+        if (!ownedMembers.isEmpty()) {
+            List<Long> memberIds = ownedMembers.stream()
+                    .map(Member::getId)
+                    .toList();
+
+            // 2. Clear Member-specific dependencies first
+            auditLogRepository.deleteAll();
+
+            // 3. Break the link in the User table if the User currently points to one of these members
+            // (This prevents Foreign Key violations during member deletion)
+            currentUser.setMemberId(null);
+            userRepository.saveAndFlush(currentUser);
+
+            // 4. Delete all members owned by this user
+            memberRepository.deleteAll(ownedMembers);
+        }
+
+        // 5. Delete User-specific dependencies
+        userSocialAccountRepository.deleteByUser(currentUser);
+
+        // 6. Finally, delete the User
+        userRepository.delete(currentUser);
+
+        // Clear security context
+        SecurityContextHolder.clearContext();
     }
 
     private UserResponse buildIncompleteProfileResponse(User user) {
