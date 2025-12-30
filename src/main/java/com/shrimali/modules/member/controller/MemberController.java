@@ -5,6 +5,7 @@ import com.shrimali.model.member.Member;
 import com.shrimali.modules.member.dto.*;
 import com.shrimali.modules.member.mapper.MemberMapper;
 import com.shrimali.modules.member.services.MemberService;
+import com.shrimali.modules.shared.dto.PresignedUrlResponse;
 import com.shrimali.modules.shared.services.ImageUploadService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -155,10 +156,7 @@ public class MemberController {
         return ResponseEntity.ok(Map.of("message", "success", "data", "Current member has been removed from community"));
     }
 
-    @PostMapping(
-            value = "/photo",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping(value = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProfilePhotoResponse> uploadProfilePhoto(
             Principal principal,
             @RequestParam("photo") MultipartFile photo
@@ -168,6 +166,23 @@ public class MemberController {
         return ResponseEntity.ok(
                 new ProfilePhotoResponse(photoUrl)
         );
+    }
+
+    @GetMapping("/photo-upload-url")
+    public ResponseEntity<PresignedUrlResponse> getUploadUrl(
+            @RequestParam("fileName") String fileName,
+            @RequestParam("contentType") String contentType
+    ) {
+        // Generates a link for the frontend to upload DIRECTLY to S3
+        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(fileName, contentType);
+        return ResponseEntity.ok(presignedUrl);
+    }
+
+    @PatchMapping("/update-photo-path")
+    public ResponseEntity<ProfilePhotoResponse> updatePhotoPath(@RequestBody UpdatePhotoRequest request) {
+        String photoUrl = imageUploadService.updateMemberPhoto(request.getPhotoUrl());
+
+        return ResponseEntity.ok(new ProfilePhotoResponse(photoUrl));
     }
 
     @GetMapping("/my-profile")
