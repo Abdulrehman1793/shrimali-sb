@@ -43,16 +43,14 @@ public class MemberContactController {
     }
 
     /* -------------------- UPDATE CONTACT -------------------- */
-    @PutMapping
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateContact(
-            Principal principal,
+            @PathVariable Long id,
             @Valid @RequestBody ContactPayload payload
     ) {
         log.debug("Updating contact: {}", payload);
-        memberContactService.updateContact(principal, payload);
-        return ResponseEntity.ok(
-                Map.of("message", "Contact updated successfully")
-        );
+        memberContactService.updateContact(id, payload);
+        return ResponseEntity.ok(Map.of("message", "Contact updated successfully"));
     }
 
     /* -------------------- DELETE CONTACT -------------------- */

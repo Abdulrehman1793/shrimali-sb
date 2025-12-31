@@ -11,7 +11,7 @@ public interface MemberContactService {
 
     void addContact(Principal principal, ContactPayload contactPayload);
 
-    void updateContact(Principal principal, ContactPayload contactPayload);
+    void updateContact(Long id, ContactPayload contactPayload);
 
     void removeContact(Principal principal, ContactPayload contactPayload);
 }

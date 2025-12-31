@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberContactRepository extends JpaRepository<MemberContact, Integer> {
+public interface MemberContactRepository extends JpaRepository<MemberContact, Long> {
     List<MemberContact> findByMember_Id(Long memberId);
 
     Optional<MemberContact> findByMember_IdAndTypeAndValue(

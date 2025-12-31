@@ -1,11 +1,16 @@
 package com.shrimali.modules.member.mapper;
 
+import com.shrimali.model.auth.User;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberAddress;
+import com.shrimali.modules.member.dto.BasicInfoDTO;
+import com.shrimali.modules.member.dto.DiscoveryResponse;
 import com.shrimali.modules.member.dto.MemberResponse;
+import com.shrimali.modules.shared.services.SecurityUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 @Service
 public class MemberMapper {
@@ -29,6 +34,42 @@ public class MemberMapper {
                 .thumbnailUrl(m.getThumbnailUrl())
                 .notes(m.getNotes())
                 .build();
+    }
+
+    public BasicInfoDTO mapToBasicInfo(Member m, User currentUser) {
+        return BasicInfoDTO.builder()
+                .memberId(m.getId())
+                .firstName(m.getFirstName())
+                .middleName(m.getMiddleName())
+                .lastName(m.getLastName())
+                .gender(m.getGender())
+                .dob(m.getDob())
+                .photoUrl(m.getPhotoUrl())
+                .thumbnailUrl(m.getThumbnailUrl())
+                .maritalStatus(m.getMaritalStatus())
+                .profession(m.getProfession())
+                .education(m.getEducation())
+                .kuldevi(m.getKuldevi())
+                .notes(m.getNotes())
+                .membershipNumber(m.getMembershipNumber())
+                .gotra(m.getPaternalGotra().getId())
+                .spokenLanguages(m.getSpokenLanguages())
+                .secondaryProfession(m.getSecondaryProfession())
+                .owner(Objects.equals(m.getOwner().getId(), currentUser.getId()))
+                .bloodGroup(m.getBloodGroup())
+                .paternalVillage(m.getPaternalVillage())
+                .naniyalVillage(m.getNaniyalVillage())
+                .build();
+    }
+
+    public DiscoveryResponse convertToResponse(Member member) {
+        return new DiscoveryResponse(true, new DiscoveryResponse.MemberSummary(
+                member.getId(),
+                member.getFirstName(),
+                member.getLastName(),
+                member.getPaternalVillage(),
+                member.getPaternalGotra() != null ? member.getPaternalGotra().getName() : null
+        ));
     }
 
     private String extractCityFromAddresses(Member m) {

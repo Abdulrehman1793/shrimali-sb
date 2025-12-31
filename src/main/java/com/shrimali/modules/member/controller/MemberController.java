@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/api/v1/members")
+//@RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
 @Slf4j
 @Validated

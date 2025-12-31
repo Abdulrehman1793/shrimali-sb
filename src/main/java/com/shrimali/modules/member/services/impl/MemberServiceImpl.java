@@ -360,7 +360,7 @@ public class MemberServiceImpl implements MemberService {
             memberProfileResponse.setContacts(
                     member.getContacts().stream()
                             .map(c ->
-                                    new ContactPayload(c.getType(), c.getIsPrimary(), c.getValue())
+                                    new ContactPayload(c.getId(), c.getType(), c.getIsPrimary(), c.getValue())
                             )
                             .toList()
             );
