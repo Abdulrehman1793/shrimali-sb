@@ -3,6 +3,7 @@ package com.shrimali.model.member;
 import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.ProfileStatus;
 import lombok.*;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -130,6 +131,10 @@ public class Member {
     @Column(name = "language")
     private Set<String> spokenLanguages = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ProfileStatus status = ProfileStatus.DRAFT;
+
     // --- Gotra Information ---
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -152,6 +157,32 @@ public class Member {
     @JoinColumn(name = "current_gotra_id")
     private Gotra currentGotra;
 
+    // --- Verification & Locking ---
+
+    @Column(name = "is_verified", nullable = false)
+    private boolean verified = false;
+
+    @Column(name = "is_locked", nullable = false)
+    private boolean locked = false;
+
+    @Column(name = "verified_at")
+    private OffsetDateTime verifiedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "verified_by_user_id")
+    private User verifiedBy;
+
+    @Column(name = "lock_reason")
+    private String lockReason; // e.g., "DECEASED", "ADMIN_ACTION"
+
+    /**
+     * Helper to check if the identity-impacting fields should be frozen.
+     * Identity includes: Names, Gender, DOB, and Parent Links.
+     */
+    public boolean isIdentityFrozen() {
+        return this.verified || this.locked || this.deceased;
+    }
+
     @CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
@@ -168,11 +199,41 @@ public class Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MemberAddress> addresses = new HashSet<>();
 
-    // --- Logic for Membership Number ---
+
+    // --- Lifecycle Hooks ---
+
     @PrePersist
-    public void ensureMembershipNumber() {
+    public void onPrePersist() {
+        // 1. Ensure Membership Number exists
         if (this.membershipNumber == null) {
             this.membershipNumber = generateMemberNumber(firstName, middleName, lastName);
+        }
+        // 2. Sync the status
+        syncStatus();
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        // Sync status before every update
+        syncStatus();
+    }
+
+    /**
+     * Logic to ensure flags and Enum are always consistent.
+     * This prevents a database state where deceased=true but status=DRAFT.
+     */
+    private void syncStatus() {
+        if (this.deceased) {
+            this.status = ProfileStatus.DECEASED;
+            this.locked = true;
+            this.lockReason = (this.lockReason == null) ? "DECEASED" : this.lockReason;
+        } else if (this.locked) {
+            this.status = ProfileStatus.LOCKED;
+        } else if (this.verified) {
+            this.status = ProfileStatus.VERIFIED;
+        } else {
+            // Fallback to DRAFT if no other flags are set
+            this.status = ProfileStatus.DRAFT;
         }
     }
 

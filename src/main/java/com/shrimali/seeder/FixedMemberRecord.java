@@ -25,7 +25,6 @@ public class FixedMemberRecord implements ApplicationRunner {
             log.info("First Name: {}, Middle Name: {}, Last Name: {}", member.getFirstName(), member.getMiddleName(), member.getLastName());
             log.info("memberNumber: {}", memberNumber);
             member.setMembershipNumber(memberNumber);
-            member.ensureMembershipNumber();
             memberRepository.save(member);
         });
     }
