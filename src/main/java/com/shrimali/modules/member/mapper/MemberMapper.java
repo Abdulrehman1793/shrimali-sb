@@ -26,6 +26,7 @@ public class MemberMapper {
                 .maritalStatus(m.getMaritalStatus())
 //                .city(extractCityFromAddresses(m)) // optional helper
                 .photoUrl(m.getPhotoUrl())
+                .thumbnailUrl(m.getThumbnailUrl())
                 .notes(m.getNotes())
                 .build();
     }

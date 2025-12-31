@@ -588,6 +588,7 @@ public class MemberServiceImpl implements MemberService {
                 .gender(m.getGender())
                 .dob(m.getDob())
                 .photoUrl(m.getPhotoUrl())
+                .thumbnailUrl(m.getThumbnailUrl())
                 .maritalStatus(m.getMaritalStatus())
                 .profession(m.getProfession())
                 .education(m.getEducation())

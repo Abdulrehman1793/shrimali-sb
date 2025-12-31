@@ -197,6 +197,7 @@ public class AuthServiceImpl implements AuthService {
                 .lastName(member.getLastName())
                 .gender(member.getGender())
                 .photoUrl(member.getPhotoUrl())
+                .thumbnailUrl(member.getThumbnailUrl())
                 .phone(user.getPhone())
                 .dob(member.getDob() != null ? member.getDob().toString() : null)
                 .role(role)

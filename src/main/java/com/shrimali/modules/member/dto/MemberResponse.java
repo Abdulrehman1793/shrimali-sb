@@ -23,6 +23,7 @@ public class MemberResponse {
     private String membershipStatus;
     private String city;
     private String photoUrl;
+    private String thumbnailUrl;
     private String notes;
     private String phone;
     private String maritalStatus;

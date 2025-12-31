@@ -87,16 +87,30 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     }
 
     @Override
-    public PresignedUrlResponse getPresignedUploadUrl(String originalFileName, String contentType) {
+    public PresignedUrlResponse getPresignedUploadUrl(String fileName, String contentType, boolean isThumbnail) {
         User currentUser = securityUtils.getCurrentUser();
         Member member = memberRepository.findById(currentUser.getMemberId())
                 .orElseThrow(() -> new BadRequestException("Member not found"));
 
-        String extension = originalFileName.substring(originalFileName.lastIndexOf('.'));
+        String folder = isThumbnail ? "thumbnails" : "originals";
 
-        String fileName = member.getMembershipNumber() + "_" + System.currentTimeMillis() + extension;
+        // Extract extension
+        String extension = "";
+        int i = fileName.lastIndexOf('.');
+        if (i > 0) {
+            extension = fileName.substring(i);
+        } else if (isThumbnail) {
+            extension = ".jpg";
+        }
 
-        String objectKey = "profiles/originals/" + fileName;
+        long timestamp = System.currentTimeMillis();
+
+        // Construct Key: profiles/thumbnails/MEM123_1703954000.jpg
+        String objectKey = String.format("profiles/%s/%s_%d%s",
+                folder,
+                member.getMembershipNumber(),
+                timestamp,
+                extension);
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -105,18 +119,18 @@ public class ImageUploadServiceImpl implements ImageUploadService {
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(5)) // 1 min is very short, 5 is safer
+                .signatureDuration(Duration.ofMinutes(5))
                 .putObjectRequest(objectRequest)
                 .build();
 
-        String presignedUrl = s3Presigner.presignPutObject(presignRequest).url().toString();
+        String url = s3Presigner.presignPutObject(presignRequest).url().toString();
 
-        return new PresignedUrlResponse(presignedUrl, objectKey);
+        return new PresignedUrlResponse(url, objectKey);
     }
 
     @Override
     @Transactional
-    public String updateMemberPhoto(String s3Key) {
+    public String updateMemberPhoto(String s3Key, String thumbnailUrl) {
         User currentUser = securityUtils.getCurrentUser();
 
         Member member = memberRepository.findById(currentUser.getMemberId())
@@ -124,6 +138,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
 
         // Update the field in your DB entity
         member.setPhotoUrl(s3Key);
+        member.setThumbnailUrl(thumbnailUrl);
         memberRepository.save(member);
 
         return s3Key;

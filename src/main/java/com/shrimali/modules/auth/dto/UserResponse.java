@@ -28,6 +28,7 @@ public class UserResponse {
     private RoleName role;
 
     private String photoUrl;
+    private String thumbnailUrl;
 
     private UserStatus status;
 

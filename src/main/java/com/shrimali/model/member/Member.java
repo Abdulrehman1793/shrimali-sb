@@ -119,6 +119,9 @@ public class Member {
     @Column(name = "photo_url")
     private String photoUrl;
 
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
+
     @ElementCollection
     @CollectionTable(
             name = "member_spoken_languages",

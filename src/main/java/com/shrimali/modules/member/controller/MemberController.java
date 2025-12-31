@@ -171,16 +171,17 @@ public class MemberController {
     @GetMapping("/photo-upload-url")
     public ResponseEntity<PresignedUrlResponse> getUploadUrl(
             @RequestParam("fileName") String fileName,
-            @RequestParam("contentType") String contentType
+            @RequestParam("contentType") String contentType,
+            @RequestParam(value = "isThumbnail", defaultValue = "false") boolean isThumbnail
     ) {
-        // Generates a link for the frontend to upload DIRECTLY to S3
-        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(fileName, contentType);
+        // Now passes the isThumbnail flag to the service logic
+        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(fileName, contentType, isThumbnail);
         return ResponseEntity.ok(presignedUrl);
     }
 
     @PatchMapping("/update-photo-path")
     public ResponseEntity<ProfilePhotoResponse> updatePhotoPath(@RequestBody UpdatePhotoRequest request) {
-        String photoUrl = imageUploadService.updateMemberPhoto(request.getPhotoUrl());
+        String photoUrl = imageUploadService.updateMemberPhoto(request.getPhotoUrl(), request.getThumbnailUrl());
 
         return ResponseEntity.ok(new ProfilePhotoResponse(photoUrl));
     }

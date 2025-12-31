@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public class UpdatePhotoRequest {
     private String photoUrl;
+    private String thumbnailUrl;
 }

@@ -27,6 +27,7 @@ public class BasicInfoDTO {
     private RoleName role;
 
     private String photoUrl;
+    private String thumbnailUrl;
 
     private Long gotra;
 
