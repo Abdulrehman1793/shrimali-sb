@@ -1,5 +1,6 @@
 package com.shrimali.modules.member.services.impl;
 
+import com.shrimali.dto.AuthenticatedIdentity;
 import com.shrimali.dto.PagedResponse;
 import com.shrimali.exceptions.BadRequestException;
 import com.shrimali.model.Gotra;
@@ -407,16 +408,15 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void updateFatherDetails(DiscoverySearchRequest dto) {
-        User currentUser = securityUtils.getCurrentUser();
-
-        Member member = getMember(currentUser);
+        AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
+        Member member = currentIdentity.member();
 
         Member newMember = Member.builder()
                 .firstName(dto.firstName())
                 .middleName(dto.middleName())
                 .lastName(dto.lastName())
                 .dob(LocalDate.parse(dto.dob()))
-                .owner(currentUser)
+                .owner(currentIdentity.user())
                 .gender(Gender.Male)
                 .maritalStatus("married")
                 .membershipStatus("PENDING_APPROVAL")
@@ -435,16 +435,15 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void updateSpouseDetails(DiscoverySearchRequest dto) {
-        User currentUser = securityUtils.getCurrentUser();
-
-        Member member = getMember(currentUser);
+        AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
+        Member member = currentIdentity.member();
 
         Member newMember = Member.builder()
                 .firstName(dto.firstName())
                 .middleName(dto.middleName())
                 .lastName(dto.lastName())
                 .dob(LocalDate.parse(dto.dob()))
-                .owner(currentUser)
+                .owner(currentIdentity.user())
                 .gender(Gender.Female)
                 .maritalStatus("married")
                 .membershipStatus("PENDING_APPROVAL")
