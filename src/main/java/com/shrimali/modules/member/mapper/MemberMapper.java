@@ -1,16 +1,21 @@
 package com.shrimali.modules.member.mapper;
 
+import com.shrimali.dto.PagedResponse;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberAddress;
+import com.shrimali.model.member.MemberContact;
 import com.shrimali.modules.member.dto.BasicInfoDTO;
 import com.shrimali.modules.member.dto.DiscoveryResponse;
 import com.shrimali.modules.member.dto.MemberListItem;
 import com.shrimali.modules.member.dto.MemberResponse;
 import com.shrimali.modules.shared.services.SecurityUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -86,6 +91,21 @@ public class MemberMapper {
                 .thumbnailUrl(m.getThumbnailUrl())
                 .notes(m.getNotes())
                 .build();
+    }
+
+    public PagedResponse<MemberListItem> mapToPagedResponse(Page<Member> page) {
+        List<MemberListItem> items = page.getContent().stream()
+                .map(this::toListItem)
+                .toList();
+
+        return new PagedResponse<>(
+                items,
+                PageRequest.of(
+                        page.getPageable().getPageNumber(),
+                        page.getPageable().getPageSize(),
+                        page.getSort()),
+                page.getTotalElements()
+        );
     }
 
     private String extractCityFromAddresses(Member m) {

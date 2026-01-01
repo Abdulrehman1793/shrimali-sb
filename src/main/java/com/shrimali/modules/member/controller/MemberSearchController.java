@@ -1,10 +1,7 @@
 package com.shrimali.modules.member.controller;
 
 import com.shrimali.dto.PagedResponse;
-import com.shrimali.modules.member.dto.DiscoveryResponse;
-import com.shrimali.modules.member.dto.DiscoverySearchRequest;
-import com.shrimali.modules.member.dto.MemberListItem;
-import com.shrimali.modules.member.dto.MemberResponse;
+import com.shrimali.modules.member.dto.*;
 import com.shrimali.modules.member.services.MemberSearchService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -55,12 +52,15 @@ public class MemberSearchController {
     @PreAuthorize("hasAnyRole('USER','ADMIN', 'SUPER_ADMIN')")
     @GetMapping
     public ResponseEntity<PagedResponse<MemberListItem>> getMembersPaged(
-            @RequestParam(value = "q", required = false) String q,
+            // Spring maps ?village=xyz&gotra=abc automatically to this object
+            MemberFilterRequest filters,
             @RequestParam(value = "page", defaultValue = "0") @Min(0) int page,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) int size) {
 
         final Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return ResponseEntity.ok(memberSearchService.listMembers(q, pageable));
+
+        // Pass the filter object to your service layer
+        return ResponseEntity.ok(memberSearchService.listMembers(filters, pageable));
     }
 
     /**

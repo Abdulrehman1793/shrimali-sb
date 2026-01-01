@@ -28,7 +28,7 @@ public interface MemberSearchService {
      * @param pageable Pagination and sorting parameters
      * @return A paged list of active members
      */
-    PagedResponse<MemberListItem> listMembers(String query, Pageable pageable);
+    PagedResponse<MemberListItem> listMembers(MemberFilterRequest query, Pageable pageable);
 
     /**
      * Retrieves the administrative queue of members awaiting verification.
