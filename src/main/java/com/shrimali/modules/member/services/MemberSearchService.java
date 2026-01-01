@@ -53,4 +53,6 @@ public interface MemberSearchService {
     MemberResponse getMember(Long memberId);
 
     DiscoveryResponse discoverExistingMember(DiscoverySearchRequest request);
+
+    PagedResponse<MemberListItem> getManagedMembers(int page, int size);
 }

@@ -5,6 +5,7 @@ import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberAddress;
 import com.shrimali.modules.member.dto.BasicInfoDTO;
 import com.shrimali.modules.member.dto.DiscoveryResponse;
+import com.shrimali.modules.member.dto.MemberListItem;
 import com.shrimali.modules.member.dto.MemberResponse;
 import com.shrimali.modules.shared.services.SecurityUtils;
 import org.springframework.stereotype.Service;
@@ -70,6 +71,21 @@ public class MemberMapper {
                 member.getPaternalVillage(),
                 member.getPaternalGotra() != null ? member.getPaternalGotra().getName() : null
         ));
+    }
+
+    public MemberListItem toListItem(Member m) {
+        if (m == null) return null;
+        return MemberListItem.builder()
+                .id(m.getId())
+                .firstName(m.getFirstName())
+                .middleName(m.getMiddleName())
+                .lastName(m.getLastName())
+                .gender(m.getGender().toString())
+                .dob(m.getDob())
+                .photoUrl(m.getPhotoUrl())
+                .thumbnailUrl(m.getThumbnailUrl())
+                .notes(m.getNotes())
+                .build();
     }
 
     private String extractCityFromAddresses(Member m) {

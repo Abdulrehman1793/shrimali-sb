@@ -101,4 +101,18 @@ public class MemberSearchController {
         DiscoveryResponse response = memberSearchService.discoverExistingMember(request);
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * Retrieves all member profiles managed by the current user.
+     * These are profiles created by the user for their family tree
+     * where they hold ownership and editing rights.
+     */
+    @GetMapping("/managed")
+    public ResponseEntity<PagedResponse<MemberListItem>> getManagedMembers(
+            @RequestParam(value = "page", defaultValue = "0") @Min(0) int page,
+            @RequestParam(value = "size", defaultValue = "10") @Min(1) int size
+    ) {
+        // We delegate to the service which uses SecurityUtils to find 'who' is asking
+        return ResponseEntity.ok(memberSearchService.getManagedMembers(page, size));
+    }
 }

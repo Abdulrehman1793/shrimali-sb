@@ -20,6 +20,7 @@ public class MemberListItem {
     private String gender;
     private LocalDate dob;
     private String photoUrl;
+    private String thumbnailUrl;
     private String notes;
 
     private String phone;
