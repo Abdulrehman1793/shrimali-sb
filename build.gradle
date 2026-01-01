@@ -67,6 +67,10 @@ dependencyManagement {
 	}
 }
 
+bootJar {
+	archiveFileName = "shrimali-${project.version}.jar"
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
