@@ -199,6 +199,17 @@ public class Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MemberAddress> addresses = new HashSet<>();
 
+    @OneToMany(mappedBy = "father")
+    private Set<Member> childrenAsFather = new HashSet<>();
+
+    @OneToMany(mappedBy = "mother")
+    private Set<Member> childrenAsMother = new HashSet<>();
+
+    // For the elective relationships
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private Set<MemberRelationship> customRelationships = new HashSet<>();
+
+
 
     // --- Lifecycle Hooks ---
 

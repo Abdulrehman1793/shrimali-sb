@@ -96,6 +96,13 @@ app:
     secure: false      # Set to 'true' in production with HTTPS
     same-site: "Lax"
     domain: ""
+  backup:
+    bin-path: "C:/Program Files/PostgreSQL/17/bin/pg_dump.exe"
+    cron: "0 0 1 * * ?" # Every day at 1 AM
+    path: "./backups/"
+    database: shrimali_db
+    username: ${PG_USERNAME}
+    password: ${PG_PASSWORD}
 
 aws:
   s3:
