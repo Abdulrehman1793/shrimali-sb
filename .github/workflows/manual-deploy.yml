@@ -3,6 +3,9 @@ name: Manual EC2 Deployment
 on:
   workflow_dispatch: # This enables the manual button
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
