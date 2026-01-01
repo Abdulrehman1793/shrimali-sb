@@ -4,6 +4,7 @@
 spring:
   application:
     name: Shrimali
+    version: 1.0.0
 
   profiles:
     active: dev
