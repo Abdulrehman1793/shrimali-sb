@@ -53,7 +53,19 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo systemctl restart shrimali-app || (
-              fuser -k 8080/tcp || true
-              nohup java -jar ~/app/*.jar --spring.profiles.active=prod > ~/app/log.txt 2>&1 &
-            )
+            cd ~/app
+            fuser -k 3005/tcp || true # Note: Updated to port 3005 from your YAML
+            
+            # Start the app with all necessary environment variables
+            nohup java -jar *.jar \
+              --spring.profiles.active=prod \
+              --PG_DB_NAME="${{ secrets.PG_DB_NAME }}" \
+              --PG_USERNAME="${{ secrets.PG_USERNAME }}" \
+              --PG_PASSWORD="${{ secrets.PG_PASSWORD }}" \
+              --MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}" \
+              --MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
+              --GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+              --GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+              --app.backup.bin-path="/usr/bin/pg_dump" \
+              --app.client.url="http://your-ec2-ip-or-domain" \
+              > log.txt 2>&1 &
