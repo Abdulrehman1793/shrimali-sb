@@ -74,7 +74,7 @@ app:
   cookie:
     http-only: true
     secure: true
-    sameSite: None
+    sameSite: Lax
     domain: ""
     forceSecure: true
 
