@@ -1,0 +1,92 @@
+spring:
+  application:
+    name: Shrimali
+    version: 1.0.0
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+
+    properties:
+      mail:
+        debug: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${PG_DB_NAME}
+    username: ${PG_USERNAME}
+    password: ${PG_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 2
+      pool-name: HikariPool
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  jpa:
+    hibernate:
+      ddl-auto: update # or none, validate, create
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            redirect-uri: "https://dyivpjehgjmg8.cloudfront.net/login/oauth2/code/google"
+        provider:
+          google:
+            user-name-attribute: sub
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+            token-uri: https://oauth2.googleapis.com/token
+server:
+  forward-headers-strategy: framework
+  tomcat:
+    remote-ip-header: x-forwarded-for
+    protocol-header: x-forwarded-proto
+  port: 3005
+
+logging:
+  level:
+    reactor.netty: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+
+app:
+  env: prod
+
+  # FRONTEND URL (React app)
+  client:
+    url: "https://shrimalis.com"
+
+  cookie:
+    http-only: true
+    secure: true
+    sameSite: None
+    domain: ""
+    forceSecure: true
+
+  backup:
+    bin-path: "C:/Program Files/PostgreSQL/17/bin/pg_dump.exe"
+    cron: "0 0 1 * * ?" # Every day at 1 AM
+    path: "./backups/"
+    database: ${PG_DB_NAME}
+    username: ${PG_USERNAME}
+    password: ${PG_PASSWORD}
+
+aws:
+  s3:
+    bucket:
+      shrimali-profile-images
