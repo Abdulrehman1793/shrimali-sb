@@ -80,6 +80,7 @@ spring:
 # SERVER & LOGGING
 # ===================================================================
 server:
+  forward-headers-strategy: native
   port: 3005
 
 logging:
