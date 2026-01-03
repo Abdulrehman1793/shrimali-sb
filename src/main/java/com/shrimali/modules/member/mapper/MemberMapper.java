@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -68,14 +69,24 @@ public class MemberMapper {
                 .build();
     }
 
-    public DiscoveryResponse convertToResponse(Member member) {
-        return new DiscoveryResponse(true, new DiscoveryResponse.MemberSummary(
-                member.getId(),
-                member.getFirstName(),
-                member.getLastName(),
-                member.getPaternalVillage(),
-                member.getPaternalGotra() != null ? member.getPaternalGotra().getName() : null
-        ));
+    public DiscoveryResponse convertToResponse(List<Member> members) {
+        // Check if the list is empty first
+        if (members == null || members.isEmpty()) {
+            return new DiscoveryResponse(false, Collections.emptyList());
+        }
+
+        // Map the list of Member entities to a list of MemberSummary DTOs
+        List<DiscoveryResponse.MemberSummary> summaries = members.stream()
+                .map(m -> new DiscoveryResponse.MemberSummary(
+                        m.getId(), // Ensure ID is a String for your TS interface
+                        m.getFirstName(),
+                        m.getLastName(),
+                        m.getPaternalVillage(),
+                        m.getPaternalGotra() != null ? m.getPaternalGotra().getName() : null
+                ))
+                .toList();
+
+        return new DiscoveryResponse(true, summaries);
     }
 
     public MemberListItem toListItem(Member m) {

@@ -3,6 +3,7 @@ package com.shrimali.config;
 
 import com.shrimali.dto.ErrorResponse;
 import com.shrimali.exceptions.BadRequestException;
+import com.shrimali.exceptions.ConflictException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
@@ -222,5 +223,24 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    /* ---------------- CONFLICT ---------------- */
+
+    /**
+     * Handle custom business rule conflicts (e.g., duplicate profile)
+     */
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflictException(
+            ConflictException ex, WebRequest webRequest) {
+
+        log.warn("Conflict encountered: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 }

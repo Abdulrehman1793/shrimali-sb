@@ -1,16 +1,18 @@
 package com.shrimali.modules.member.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record DiscoverySearchRequest(
         @NotBlank String firstName,
-        String middleName,
+        @NotBlank String middleName,
         @NotBlank String lastName,
         @NotBlank String dob,
-        String gotra,
+        @NotNull Long gotra,
         @NotBlank String gender,
-        @NotBlank String relationType,
+        String relationType,
         String paternalVillage,
         String naniyalVillage,
         Boolean deceased
-) {}
+) {
+}

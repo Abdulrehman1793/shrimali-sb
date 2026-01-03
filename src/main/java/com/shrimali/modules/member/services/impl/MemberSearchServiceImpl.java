@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -96,14 +97,16 @@ public class MemberSearchServiceImpl implements MemberSearchService {
         LocalDate birthDate = LocalDate.parse(request.dob());
 
         // 3. Execute Search
-        return memberRepository.findFirstByFirstNameIgnoreCaseAndLastNameIgnoreCaseAndDobAndGender(
+        List<Member> foundMembers = memberRepository
+                .findByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseAndLastNameIgnoreCaseAndDobAndGender(
                         request.firstName(),
+                        request.middleName(),
                         request.lastName(),
                         birthDate,
                         searchGender
-                )
-                .map(memberMapper::convertToResponse)
-                .orElse(new DiscoveryResponse(false, null));
+                );
+
+        return memberMapper.convertToResponse(foundMembers);
     }
 
     @Override

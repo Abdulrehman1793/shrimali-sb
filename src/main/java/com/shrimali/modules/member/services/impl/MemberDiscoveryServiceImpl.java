@@ -1,6 +1,7 @@
 package com.shrimali.modules.member.services.impl;
 
 import com.shrimali.exceptions.BadRequestException;
+import com.shrimali.exceptions.ConflictException;
 import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.UserStatus;
@@ -54,7 +55,18 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
     @Override
     @Transactional
     public void registerNewMember(MemberDiscoveryDto dto) {
-        User currentUser = securityUtils.getCurrentUser(); // Helper to get logged-in user
+        User currentUser = securityUtils.getCurrentUser();
+
+        boolean alreadyExists = memberRepository.existsByFirstNameIgnoreCaseAndMiddleNameIgnoreCaseAndLastNameIgnoreCaseAndDob(
+                dto.getFirstName(),
+                dto.getMiddleName(),
+                dto.getLastName(),
+                dto.getDob()
+        );
+
+        if (alreadyExists) {
+            throw new ConflictException("A profile with this name and date of birth already exists in the community tree.");
+        }
 
         Gotra gotra = gotraRepository.findById(dto.getGotra())
                 .orElseThrow(() -> new BadRequestException("Gotra not found"));

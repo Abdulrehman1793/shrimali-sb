@@ -31,6 +31,14 @@ public interface MemberRepository extends JpaRepository<Member, Long>, JpaSpecif
             @Param("dob") LocalDate dob
     );
 
+    List<Member> findByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseAndLastNameIgnoreCaseAndDobAndGender(
+            String firstName,
+            String middleName,
+            String lastName,
+            LocalDate dob,
+            Gender gender
+    );
+
     // Core discovery query: matches by Names, DOB, and Gender
     Optional<Member> findFirstByFirstNameIgnoreCaseAndLastNameIgnoreCaseAndDobAndGender(
             String firstName,
@@ -55,4 +63,11 @@ public interface MemberRepository extends JpaRepository<Member, Long>, JpaSpecif
 
     @EntityGraph(attributePaths = {"addresses", "contacts"})
     Optional<Member> findById(Long id);
+
+    boolean existsByFirstNameIgnoreCaseAndMiddleNameIgnoreCaseAndLastNameIgnoreCaseAndDob(
+            String firstName,
+            String middleName,
+            String lastName,
+            LocalDate dob
+    );
 }

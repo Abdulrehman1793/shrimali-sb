@@ -507,13 +507,13 @@ public class MemberServiceImpl implements MemberService {
     }
 
     private DiscoveryResponse convertToResponse(Member member) {
-        return new DiscoveryResponse(true, new DiscoveryResponse.MemberSummary(
+        return new DiscoveryResponse(true, List.of(new DiscoveryResponse.MemberSummary(
                 member.getId(),
                 member.getFirstName(),
                 member.getLastName(),
                 member.getPaternalVillage(),
                 member.getPaternalGotra() != null ? member.getPaternalGotra().getName() : null
-        ));
+        )));
     }
 
     private User getUser(Principal principal) {

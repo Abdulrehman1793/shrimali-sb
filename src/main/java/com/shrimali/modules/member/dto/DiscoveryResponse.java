@@ -1,10 +1,11 @@
 package com.shrimali.modules.member.dto;
 
+import java.util.List;
 import java.util.UUID;
 
 public record DiscoveryResponse(
         boolean exists,
-        MemberSummary member
+        List<MemberSummary> member
 ) {
     public record MemberSummary(
             Long id,
