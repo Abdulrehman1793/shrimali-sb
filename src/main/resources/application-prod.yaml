@@ -69,7 +69,7 @@ app:
 
   # FRONTEND URL (React app)
   client:
-    url: "https://shrimalis.com"
+    url: "https://dyivpjehgjmg8.cloudfront.net"
 
   cookie:
     http-only: true
