@@ -3,7 +3,11 @@ package com.shrimali.modules.member.services.impl;
 import com.shrimali.exceptions.BadRequestException;
 import com.shrimali.exceptions.ConflictException;
 import com.shrimali.model.Gotra;
+import com.shrimali.model.auth.Role;
 import com.shrimali.model.auth.User;
+import com.shrimali.model.enums.MembershipStatus;
+import com.shrimali.model.enums.ProfileStatus;
+import com.shrimali.model.enums.RoleName;
 import com.shrimali.model.enums.UserStatus;
 import com.shrimali.model.member.Member;
 import com.shrimali.modules.member.dto.MemberDiscoveryDto;
@@ -19,7 +23,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -54,7 +60,7 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
 
     @Override
     @Transactional
-    public void registerNewMember(MemberDiscoveryDto dto) {
+    public Member registerNewMember(MemberDiscoveryDto dto) {
         User currentUser = securityUtils.getCurrentUser();
 
         boolean alreadyExists = memberRepository.existsByFirstNameIgnoreCaseAndMiddleNameIgnoreCaseAndLastNameIgnoreCaseAndDob(
@@ -68,33 +74,47 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
             throw new ConflictException("A profile with this name and date of birth already exists in the community tree.");
         }
 
+        boolean isAdmin = currentUser.getAuthorities().stream()
+                .anyMatch(a ->
+                        Objects.requireNonNull(a.getAuthority()).equalsIgnoreCase(RoleName.ROLE_ADMIN.toString())
+                                || a.getAuthority().equalsIgnoreCase(RoleName.ROLE_SUPER_ADMIN.toString()));
+
+        MembershipStatus initialMembershipStatus = isAdmin ? MembershipStatus.ACTIVE : MembershipStatus.PENDING_APPROVAL;
+        ProfileStatus initialProfileStatus = isAdmin ? ProfileStatus.VERIFIED : ProfileStatus.DRAFT;
+
         Gotra gotra = gotraRepository.findById(dto.getGotra())
                 .orElseThrow(() -> new BadRequestException("Gotra not found"));
 
-        // 1. Create the Member Profile
         Member newMember = Member.builder()
                 .firstName(dto.getFirstName())
                 .middleName(dto.getMiddleName())
                 .lastName(dto.getLastName())
+                .membershipNumber(Member.generateMemberNumber(dto.getFirstName(), dto.getMiddleName(), dto.getLastName()))
                 .dob(dto.getDob())
                 .paternalVillage(dto.getPaternalVillage())
                 .naniyalVillage(dto.getNaniyalVillage())
                 .gender(dto.getGender())
                 .paternalGotra(gotra)
-                .owner(currentUser)      // User manages themselves
-                .linkedUser(currentUser) // User IS this person
-                .membershipStatus("PENDING_APPROVAL") // The Gatekeeper
+                .owner(currentUser)
+                .linkedUser(currentUser)
+                .membershipStatus(initialMembershipStatus)
+                .status(initialProfileStatus)
+                .verified(isAdmin) // Admins are auto-verified
+                .verifiedAt(isAdmin ? OffsetDateTime.now() : null)
+                .verifiedBy(isAdmin ? currentUser : null)
                 .build();
 
         Member savedMember = memberRepository.save(newMember);
 
         // 2. Link User to Member and update Status
         currentUser.setMemberId(savedMember.getId());
-        currentUser.setStatus(UserStatus.AWAITING_COMMUNITY_APPROVAL);
+        currentUser.setStatus(UserStatus.ACTIVE);
         userRepository.save(currentUser);
 
         auditService.logAction("NEW_MEMBER_REQUEST",
                 "User requested new profile creation. Awaiting admin approval.");
+
+        return savedMember;
     }
 
     @Override
@@ -114,12 +134,12 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
         // 1. Link the profile to the current user
         existingMember.setLinkedUser(currentUser);
         existingMember.setOwner(currentUser);
-        existingMember.setMembershipStatus("PENDING_APPROVAL"); // Still requires admin check
+        existingMember.setMembershipStatus(MembershipStatus.PENDING_APPROVAL);
         memberRepository.save(existingMember);
 
         // 2. Update User record
         currentUser.setMemberId(existingMember.getId());
-        currentUser.setStatus(UserStatus.AWAITING_COMMUNITY_APPROVAL);
+        currentUser.setStatus(UserStatus.ACTIVE);
         userRepository.save(currentUser);
 
         auditService.logAction("PROFILE_CLAIM_REQUEST",

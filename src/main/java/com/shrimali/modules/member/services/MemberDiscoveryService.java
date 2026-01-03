@@ -1,5 +1,6 @@
 package com.shrimali.modules.member.services;
 
+import com.shrimali.model.member.Member;
 import com.shrimali.modules.member.dto.MemberDiscoveryDto;
 import com.shrimali.modules.member.dto.MemberMatchResponse;
 
@@ -14,7 +15,7 @@ public interface MemberDiscoveryService {
     /**
      * Creates a brand-new member record and sets the user to "Waiting Room" status.
      */
-    void registerNewMember(MemberDiscoveryDto dto);
+    Member registerNewMember(MemberDiscoveryDto dto);
 
     void claimProfile(Long memberId);
 }

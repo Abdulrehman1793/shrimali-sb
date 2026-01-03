@@ -1,5 +1,6 @@
 package com.shrimali.modules.auth.service;
 
+import com.shrimali.config.AppConfig;
 import com.shrimali.model.auth.Role;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.auth.UserRole;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,8 @@ public class UserRegistrationService {
 
     private final AuditService auditService;
     private final EmailService emailService;
+
+    private final AppConfig appConfig;
 
     @Transactional
     public User registerOrUpdateUser(RegistrationDto dto) {
@@ -52,33 +56,49 @@ public class UserRegistrationService {
     }
 
     private User createNewUser(RegistrationDto dto) {
-        Role guestRole = roleRepository.findByName(RoleName.ROLE_GUEST)
-                .orElseThrow(() -> new RuntimeException("Default Role not found"));
+        // 1. Determine the Role (Prioritize Super Admin > Admin > Guest)
+        RoleName targetRoleName;
+        if (appConfig.getSuperAdmins().contains(dto.getEmail())) {
+            targetRoleName = RoleName.ROLE_SUPER_ADMIN;
+        } else if (appConfig.getAdmins().contains(dto.getEmail())) {
+            targetRoleName = RoleName.ROLE_ADMIN;
+        } else {
+            targetRoleName = RoleName.ROLE_GUEST;
+        }
 
-        // Build User WITHOUT a Member link
+        Role role = roleRepository.findByName(targetRoleName)
+                .orElseThrow(() -> new RuntimeException("Role " + targetRoleName + " not found in database"));
+
+        // 2. Determine initial UserStatus
+        // If email is not verified, they must verify.
+        // If it IS verified, they are ACTIVE but still need to link a Member profile.
+        UserStatus initialStatus = dto.isEmailVerified() ? UserStatus.ACTIVE : UserStatus.PENDING_VERIFICATION;
+
+        // 3. Build the User
         User user = User.builder()
                 .email(dto.getEmail())
                 .emailVerified(dto.isEmailVerified())
                 .passwordHash(dto.getPassword() != null ? passwordEncoder.encode(dto.getPassword()) : null)
-                // Use a status that tells the frontend to show the "Search/Claim" popup
-                .status(UserStatus.PENDING_PROFILE)
-                .createdAt(OffsetDateTime.now())
-                .userRoles(new HashSet<>())
+                .status(initialStatus)
+                .userRoles(new HashSet<>()) // Initialize to avoid NPE
                 .socialAccounts(new HashSet<>())
                 .build();
 
-        // Bidirectional link for the role
+        // 4. Correct Bidirectional Relationship for UserRole
+        // Crucial: The UserRole entity needs the 'user' reference if your @JoinColumn is not updatable
         UserRole userRole = UserRole.builder()
-                .role(guestRole)
+                .role(role)
                 .build();
         user.getUserRoles().add(userRole);
 
-        log.info("Creating user account for {} (No member profile linked yet)", dto.getEmail());
+        log.info("Creating user account for {} with role {} and status {}",
+                dto.getEmail(), targetRoleName, initialStatus);
 
+        // 5. Post-creation Actions
         emailService.sendWelcomeEmail(user.getEmail());
-        auditService.logAction("USER_ACCOUNT_CREATED", "Account created via " + dto.getAuthProvider());
+        auditService.logAction("USER_ACCOUNT_CREATED", "Account created. Status: " + initialStatus);
 
-        return user;
+        return userRepository.save(user);
     }
 
     private void handleSocialLink(User user, RegistrationDto dto) {

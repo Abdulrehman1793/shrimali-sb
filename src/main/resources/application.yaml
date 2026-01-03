@@ -11,7 +11,7 @@ spring:
 
   # --- DATABASE (PostgreSQL) ---
   datasource:
-    url: jdbc:postgresql://localhost:5432/${PG_DB_NAME}
+    url: jdbc:postgresql://localhost:5432/${PG_DB_NAME}?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8mb4_general_ci
     username: ${PG_USERNAME}
     password: ${PG_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -110,6 +110,12 @@ app:
     database: ${PG_DB_NAME}
     username: ${PG_USERNAME}
     password: ${PG_PASSWORD}
+  admins:
+    - pradipnsharma@gmail.com
+    - abdul.khan@actionabl.ai
+  super-admins:
+    - shrimali.shvbadi@gmail.com
+    - abdulrehman1793@gmail.com
 
 aws:
   s3:

@@ -8,6 +8,7 @@ import com.shrimali.model.auth.Role;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.auth.UserRole;
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MembershipStatus;
 import com.shrimali.model.enums.RoleName;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberGotra;
@@ -210,7 +211,7 @@ public class MemberServiceImpl implements MemberService {
         // Member update
         member.setApprovedBy(approvedBy);
         member.setApprovedAt(OffsetDateTime.now());
-        member.setMembershipStatus("APPROVED");
+        member.setMembershipStatus(MembershipStatus.ACTIVE);
 
         userRepository.save(guestUser);
         memberRepository.save(member);
@@ -317,7 +318,7 @@ public class MemberServiceImpl implements MemberService {
 
         // 7️⃣ Update member status
         member.setApprovedBy(actionBy);
-        member.setMembershipStatus("REJECTED");
+        member.setMembershipStatus(MembershipStatus.REJECTED);
         // member.setApprovedAt(OffsetDateTime.now()); // optional audit
 
         // 8️⃣ Persist
@@ -419,7 +420,7 @@ public class MemberServiceImpl implements MemberService {
                 .owner(currentIdentity.user())
                 .gender(Gender.Male)
                 .maritalStatus("married")
-                .membershipStatus("PENDING_APPROVAL")
+                .membershipStatus(MembershipStatus.ACTIVE)
                 .paternalVillage(dto.paternalVillage())
                 .naniyalVillage(dto.naniyalVillage())
                 .paternalGotra(member.getPaternalGotra())
@@ -446,7 +447,7 @@ public class MemberServiceImpl implements MemberService {
                 .owner(currentIdentity.user())
                 .gender(Gender.Female)
                 .maritalStatus("married")
-                .membershipStatus("PENDING_APPROVAL")
+                .membershipStatus(MembershipStatus.ACTIVE)
                 .paternalVillage(dto.paternalVillage())
                 .naniyalVillage(dto.naniyalVillage())
                 .paternalGotra(member.getPaternalGotra())
@@ -474,7 +475,7 @@ public class MemberServiceImpl implements MemberService {
                 .owner(currentUser)
                 .gender(Gender.Female)
                 .maritalStatus("married")
-                .membershipStatus("PENDING_APPROVAL")
+                .membershipStatus(MembershipStatus.ACTIVE)
                 .paternalVillage(dto.paternalVillage())
                 .naniyalVillage(dto.naniyalVillage())
                 .paternalGotra(member.getPaternalGotra())

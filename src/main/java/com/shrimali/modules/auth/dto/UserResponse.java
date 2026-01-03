@@ -1,6 +1,7 @@
 package com.shrimali.modules.auth.dto;
 
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MembershipStatus;
 import com.shrimali.model.enums.RoleName;
 import com.shrimali.model.enums.UserStatus;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,9 @@ public class UserResponse {
     private String thumbnailUrl;
 
     private UserStatus status;
+
+    private Long memberId;
+    private MembershipStatus membershipStatus;
 
     private boolean completed;
     private int completionPercentage;

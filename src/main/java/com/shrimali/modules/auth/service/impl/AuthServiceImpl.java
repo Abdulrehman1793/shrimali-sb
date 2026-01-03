@@ -134,12 +134,6 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    public static String generateMemberNumber(String lastName) {
-        long ts = System.currentTimeMillis();
-        int unique = Math.abs(Long.toString(ts).hashCode()) % 1_000_000;
-        return lastName.toUpperCase() + "-" + String.format("%06d", unique);
-    }
-
     @Override
     public void forgotPassword(String email) {
         User user = userRepository.findByEmail(email)
@@ -202,6 +196,8 @@ public class AuthServiceImpl implements AuthService {
                 .dob(member.getDob() != null ? member.getDob().toString() : null)
                 .role(role)
                 .status(user.getStatus())
+                .membershipStatus(member.getMembershipStatus())
+                .memberId(member.getId())
                 .completionPercentage(AppUtils.calculateCompletion(member))
                 .build();
     }

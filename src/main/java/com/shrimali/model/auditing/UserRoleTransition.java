@@ -1,7 +1,7 @@
 package com.shrimali.model.auditing;
 
 import com.shrimali.model.auth.User;
-import com.shrimali.model.enums.MemberShipStatus;
+import com.shrimali.model.enums.MembershipStatus;
 import com.shrimali.model.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.*;
@@ -57,11 +57,11 @@ public class UserRoleTransition {
        ============================ */
     @Enumerated(EnumType.STRING)
     @Column(name = "from_membership_status", length = 50)
-    private MemberShipStatus fromMembershipStatus;
+    private MembershipStatus fromMembershipStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "to_membership_status", length = 50)
-    private MemberShipStatus toMembershipStatus;
+    private MembershipStatus toMembershipStatus;
 
     /* ============================
        AUDIT INFO

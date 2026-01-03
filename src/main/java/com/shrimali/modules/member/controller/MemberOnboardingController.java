@@ -1,6 +1,7 @@
 package com.shrimali.modules.member.controller;
 
 import com.shrimali.model.auth.User;
+import com.shrimali.model.member.Member;
 import com.shrimali.modules.member.dto.MemberDiscoveryDto;
 import com.shrimali.modules.member.dto.MemberMatchResponse;
 import com.shrimali.modules.member.services.MemberDiscoveryService;
@@ -46,11 +47,11 @@ public class MemberOnboardingController {
 
         log.info("New member registration request for: {} {}", dto.getFirstName(), dto.getLastName());
 
-        discoveryService.registerNewMember(dto);
+        Member member = discoveryService.registerNewMember(dto);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "Registration successful. Awaiting community approval.");
-        response.put("status", "AWAITING_COMMUNITY_APPROVAL");
+        response.put("status", member.getMembershipStatus().toString());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

@@ -5,6 +5,7 @@ import com.shrimali.exceptions.BadRequestException;
 import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MembershipStatus;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberGotra;
 import com.shrimali.modules.member.dto.*;
@@ -140,7 +141,7 @@ public class MemberProfileServiceImpl implements MemberProfileService {
                 .owner(currentIdentity.user())
                 .gender(Gender.Male)
                 .maritalStatus("married")
-                .membershipStatus("APPROVED")
+                .membershipStatus(MembershipStatus.ACTIVE)
                 .paternalVillage(dto.paternalVillage())
                 .naniyalVillage(dto.naniyalVillage())
                 .paternalGotra(member.getPaternalGotra())
@@ -167,7 +168,7 @@ public class MemberProfileServiceImpl implements MemberProfileService {
                 .owner(currentIdentity.user())
                 .gender(Gender.Female)
                 .maritalStatus("married")
-                .membershipStatus("APPROVED")
+                .membershipStatus(MembershipStatus.ACTIVE)
                 .paternalVillage(dto.paternalVillage())
                 .naniyalVillage(dto.naniyalVillage())
                 .paternalGotra(member.getPaternalGotra())
@@ -193,7 +194,7 @@ public class MemberProfileServiceImpl implements MemberProfileService {
                 .dob(LocalDate.parse(dto.dob()))
                 .owner(currentIdentity.user())
                 .maritalStatus("married")
-                .membershipStatus("APPROVED")
+                .membershipStatus(MembershipStatus.ACTIVE)
                 .paternalVillage(dto.paternalVillage())
                 .naniyalVillage(dto.naniyalVillage())
                 .paternalGotra(member.getPaternalGotra())

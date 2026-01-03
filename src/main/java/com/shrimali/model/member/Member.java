@@ -3,6 +3,7 @@ package com.shrimali.model.member;
 import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MembershipStatus;
 import com.shrimali.model.enums.ProfileStatus;
 import lombok.*;
 import jakarta.persistence.*;
@@ -100,8 +101,9 @@ public class Member {
     @Column(name = "membership_type")
     private String membershipType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "membership_status")
-    private String membershipStatus;
+    private MembershipStatus membershipStatus;
 
     @CreationTimestamp
     @Column(name = "joined_at")
@@ -208,7 +210,6 @@ public class Member {
     // For the elective relationships
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private Set<MemberRelationship> customRelationships = new HashSet<>();
-
 
 
     // --- Lifecycle Hooks ---
