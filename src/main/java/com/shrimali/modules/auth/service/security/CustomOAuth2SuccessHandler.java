@@ -81,7 +81,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         response.addHeader("Set-Cookie", sb.toString());
 
         // Redirect to SPA
-        String target = getClientRedirectUrl() + "/oauth2/redirect";
+        String target = getClientRedirectUrl() + "/auth/callback";
         getRedirectStrategy().sendRedirect(request, response, target);
     }
 }
