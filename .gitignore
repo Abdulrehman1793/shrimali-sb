@@ -39,3 +39,4 @@ out/
 /src/main/resources/application-ec2.yaml
 /src/main/resources/application-prod.yaml
 /src/main/resources/application-seed.yaml
+/backups/
