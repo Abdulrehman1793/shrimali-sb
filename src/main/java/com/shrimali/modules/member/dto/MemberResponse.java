@@ -1,6 +1,7 @@
 package com.shrimali.modules.member.dto;
 
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MaritalStatus;
 import com.shrimali.model.enums.MembershipStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +27,7 @@ public class MemberResponse {
     private String thumbnailUrl;
     private String notes;
     private String phone;
-    private String maritalStatus;
+    private MaritalStatus maritalStatus;
     private String profession;
     private String education;
 

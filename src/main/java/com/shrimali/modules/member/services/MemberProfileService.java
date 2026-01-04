@@ -27,9 +27,9 @@ public interface MemberProfileService {
     /**
      * Specialized updates for family tree links.
      */
-    void updateFatherDetails(DiscoverySearchRequest dto);
-    void updateMotherDetails(DiscoverySearchRequest dto);
-    void updateSpouseDetails(DiscoverySearchRequest dto);
+    void updateFatherDetails(MemberPayload dto);
+    void updateMotherDetails(MemberPayload dto);
+    void updateSpouseDetails(MemberPayload dto);
 
     /**
      * Adds or updates contact information (Phone, Email, Social).

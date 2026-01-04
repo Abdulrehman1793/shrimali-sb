@@ -1,9 +1,6 @@
 package com.shrimali.modules.member.controller;
 
-import com.shrimali.modules.member.dto.BasicInfoDTO;
-import com.shrimali.modules.member.dto.DiscoverySearchRequest;
-import com.shrimali.modules.member.dto.MemberProfileResponse;
-import com.shrimali.modules.member.dto.MemberResponse;
+import com.shrimali.modules.member.dto.*;
 import com.shrimali.modules.member.services.MemberProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +56,7 @@ public class MemberProfileController {
      * The current member becomes the 'Owner' of the newly created profile.
      */
     @PutMapping("/father")
-    public ResponseEntity<Void> updateFatherDetails(@Valid @RequestBody DiscoverySearchRequest dto) {
+    public ResponseEntity<Void> updateFatherDetails(@Valid @RequestBody MemberPayload dto) {
         memberProfileService.updateFatherDetails(dto);
         return ResponseEntity.noContent().build();
     }
@@ -69,7 +66,7 @@ public class MemberProfileController {
      * The current member becomes the 'Owner' of the newly created profile.
      */
     @PutMapping("/mother")
-    public ResponseEntity<Void> updateMotherDetails(@Valid @RequestBody DiscoverySearchRequest dto) {
+    public ResponseEntity<Void> updateMotherDetails(@Valid @RequestBody MemberPayload dto) {
         memberProfileService.updateMotherDetails(dto);
         return ResponseEntity.noContent().build();
     }
@@ -79,7 +76,7 @@ public class MemberProfileController {
      * The current member becomes the 'Owner' of the newly created profile.
      */
     @PutMapping("/spouse")
-    public ResponseEntity<Void> updateSpouseDetails(@Valid @RequestBody DiscoverySearchRequest dto) {
+    public ResponseEntity<Void> updateSpouseDetails(@Valid @RequestBody MemberPayload dto) {
         memberProfileService.updateSpouseDetails(dto);
         return ResponseEntity.noContent().build();
     }

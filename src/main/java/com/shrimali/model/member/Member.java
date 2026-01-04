@@ -3,6 +3,7 @@ package com.shrimali.model.member;
 import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MaritalStatus;
 import com.shrimali.model.enums.MembershipStatus;
 import com.shrimali.model.enums.ProfileStatus;
 import lombok.*;
@@ -95,8 +96,9 @@ public class Member {
 
     private String education;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "marital_status")
-    private String maritalStatus;
+    private MaritalStatus maritalStatus;
 
     @Column(name = "membership_type")
     private String membershipType;

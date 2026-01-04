@@ -8,6 +8,7 @@ import com.shrimali.model.auth.Role;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.auth.UserRole;
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MaritalStatus;
 import com.shrimali.model.enums.MembershipStatus;
 import com.shrimali.model.enums.RoleName;
 import com.shrimali.model.member.Member;
@@ -33,6 +34,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -125,20 +127,20 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() ->
                         new NoSuchElementException("Member not found with id: " + memberId));
 
-        member.setFirstName(payload.getFirstName());
-        member.setMiddleName(payload.getMiddleName());
-        member.setLastName(payload.getLastName());
-        member.setGender(payload.getGender());
+        member.setFirstName(payload.firstName());
+        member.setMiddleName(payload.middleName());
+        member.setLastName(payload.lastName());
+//        member.setGender(payload.gender());
 
-        if (payload.getDob() != null && !payload.getDob().isBlank()) {
-            try {
-                member.setDob(LocalDate.parse(payload.getDob()));
-            } catch (DateTimeParseException ex) {
-                throw new IllegalArgumentException(
-                        "Invalid date format for dob. Expected yyyy-MM-dd"
-                );
-            }
-        }
+//        if (payload.getDob() != null && !payload.getDob().isBlank()) {
+//            try {
+//                member.setDob(LocalDate.parse(payload.getDob()));
+//            } catch (DateTimeParseException ex) {
+//                throw new IllegalArgumentException(
+//                        "Invalid date format for dob. Expected yyyy-MM-dd"
+//                );
+//            }
+//        }
 
         Member savedMember = memberRepository.save(member);
 
@@ -419,7 +421,7 @@ public class MemberServiceImpl implements MemberService {
                 .dob(LocalDate.parse(dto.dob()))
                 .owner(currentIdentity.user())
                 .gender(Gender.Male)
-                .maritalStatus("married")
+                .maritalStatus(MaritalStatus.MARRIED)
                 .membershipStatus(MembershipStatus.ACTIVE)
                 .paternalVillage(dto.paternalVillage())
                 .naniyalVillage(dto.naniyalVillage())
@@ -446,7 +448,7 @@ public class MemberServiceImpl implements MemberService {
                 .dob(LocalDate.parse(dto.dob()))
                 .owner(currentIdentity.user())
                 .gender(Gender.Female)
-                .maritalStatus("married")
+                .maritalStatus(MaritalStatus.MARRIED)
                 .membershipStatus(MembershipStatus.ACTIVE)
                 .paternalVillage(dto.paternalVillage())
                 .naniyalVillage(dto.naniyalVillage())
@@ -474,7 +476,7 @@ public class MemberServiceImpl implements MemberService {
                 .dob(LocalDate.parse(dto.dob()))
                 .owner(currentUser)
                 .gender(Gender.Female)
-                .maritalStatus("married")
+                .maritalStatus(MaritalStatus.MARRIED)
                 .membershipStatus(MembershipStatus.ACTIVE)
                 .paternalVillage(dto.paternalVillage())
                 .naniyalVillage(dto.naniyalVillage())
@@ -503,18 +505,29 @@ public class MemberServiceImpl implements MemberService {
                         birthDate,
                         searchGender
                 )
-                .map(this::convertToResponse)
-                .orElse(new DiscoveryResponse(false, null));
+                .map(rows -> convertToResponse(List.of(rows)))
+                .orElse(DiscoveryResponse.builder()
+                        .exists(false).build());
     }
 
-    private DiscoveryResponse convertToResponse(Member member) {
-        return new DiscoveryResponse(true, List.of(new DiscoveryResponse.MemberSummary(
-                member.getId(),
-                member.getFirstName(),
-                member.getLastName(),
-                member.getPaternalVillage(),
-                member.getPaternalGotra() != null ? member.getPaternalGotra().getName() : null
-        )));
+    private DiscoveryResponse convertToResponse(List<Member> members) {
+        List<DiscoveryResponse.DiscoveredMemberSummary> summaries = members.stream()
+                .map(m -> {
+                    return DiscoveryResponse.DiscoveredMemberSummary.builder()
+                            .id(m.getId())
+                            .firstName(m.getFirstName())
+                            .middleName(m.getMiddleName()) // Now handled correctly by Lombok
+                            .lastName(m.getLastName())
+                            .paternalVillage(m.getPaternalVillage())
+                            .gotra(m.getPaternalGotra() != null ? m.getPaternalGotra().getName() : null)
+                            .build();
+                })
+                .toList();
+
+        return DiscoveryResponse.builder()
+                .exists(true)
+                .member(summaries)
+                .build();
     }
 
     private User getUser(Principal principal) {

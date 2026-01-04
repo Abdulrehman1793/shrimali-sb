@@ -1,6 +1,7 @@
 package com.shrimali.modules.shared.services;
 
 
+import com.shrimali.model.enums.MaritalStatus;
 import com.shrimali.model.member.Member;
 
 public class AppUtils {
@@ -39,12 +40,20 @@ public class AppUtils {
 
         // 5. Conditional Logic for Married Members
         // If married, we expect Spouse and Marriage Date to be filled
-        if ("Married".equalsIgnoreCase(m.getMaritalStatus())) {
-            total++; if (m.getSpouse() != null) filled++;
-            total++; if (m.getMarriageDate() != null) filled++;
-        } else {
-            // If not married, marital status itself still counts as a data point
-            total++; if (isNotBlank(m.getMaritalStatus())) filled++;
+        total++;
+        if (m.getMaritalStatus() != null) {
+            filled++;
+
+            // 2. Conditional requirements for Married members
+            if (m.getMaritalStatus() == MaritalStatus.MARRIED) {
+                // Spouse Link
+                total++;
+                if (m.getSpouse() != null) filled++;
+
+                // Anniversary Date
+                total++;
+                if (m.getMarriageDate() != null) filled++;
+            }
         }
 
         // 6. Media

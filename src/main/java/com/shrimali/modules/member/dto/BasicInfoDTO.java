@@ -1,6 +1,7 @@
 package com.shrimali.modules.member.dto;
 
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MaritalStatus;
 import com.shrimali.model.enums.RoleName;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -47,7 +48,7 @@ public class BasicInfoDTO {
     private Long gotra;
 
     private String bloodGroup;
-    private String maritalStatus;
+    private MaritalStatus maritalStatus;
     private String profession;
     private String secondaryProfession;
     private String education;

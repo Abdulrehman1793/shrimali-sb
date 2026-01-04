@@ -70,23 +70,40 @@ public class MemberMapper {
     }
 
     public DiscoveryResponse convertToResponse(List<Member> members) {
-        // Check if the list is empty first
+        return convertToResponse(members, null);
+    }
+
+    public DiscoveryResponse convertToResponse(List<Member> members, Long requestedGotraId) {
         if (members == null || members.isEmpty()) {
-            return new DiscoveryResponse(false, Collections.emptyList());
+            return DiscoveryResponse.builder()
+                    .exists(false)
+                    .member(Collections.emptyList())
+                    .build();
         }
 
-        // Map the list of Member entities to a list of MemberSummary DTOs
-        List<DiscoveryResponse.MemberSummary> summaries = members.stream()
-                .map(m -> new DiscoveryResponse.MemberSummary(
-                        m.getId(), // Ensure ID is a String for your TS interface
-                        m.getFirstName(),
-                        m.getLastName(),
-                        m.getPaternalVillage(),
-                        m.getPaternalGotra() != null ? m.getPaternalGotra().getName() : null
-                ))
+        List<DiscoveryResponse.DiscoveredMemberSummary> summaries = members.stream()
+                .map(m -> {
+                    // Determine if Gotra matches the user's input
+                    boolean isGotraMatch = requestedGotraId != null &&
+                            m.getPaternalGotra() != null &&
+                            m.getPaternalGotra().getId().equals(requestedGotraId);
+
+                    return DiscoveryResponse.DiscoveredMemberSummary.builder()
+                            .id(m.getId())
+                            .firstName(m.getFirstName())
+                            .middleName(m.getMiddleName()) // Now handled correctly by Lombok
+                            .lastName(m.getLastName())
+                            .paternalVillage(m.getPaternalVillage())
+                            .gotra(m.getPaternalGotra() != null ? m.getPaternalGotra().getName() : null)
+                            .matched(isGotraMatch)
+                            .build();
+                })
                 .toList();
 
-        return new DiscoveryResponse(true, summaries);
+        return DiscoveryResponse.builder()
+                .exists(true)
+                .member(summaries)
+                .build();
     }
 
     public MemberListItem toListItem(Member m) {

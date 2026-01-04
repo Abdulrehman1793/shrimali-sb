@@ -131,22 +131,52 @@ public class MemberSearchServiceImpl implements MemberSearchService {
 
     @Override
     public DiscoveryResponse discoverExistingMember(DiscoverySearchRequest request) {
-        Gender searchGender = Gender.fromString(request.gender());
+        Specification<Member> spec = Specification.where((root, query, cb) -> cb.conjunction());
 
-        // 2. Parse Date
-        LocalDate birthDate = LocalDate.parse(request.dob());
+        // 1. Mandatory Gender Filter
+        if (request.gender() != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("gender"), Gender.fromString(request.gender())));
+        }
 
-        // 3. Execute Search
-        List<Member> foundMembers = memberRepository
-                .findByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseAndLastNameIgnoreCaseAndDobAndGender(
-                        request.firstName(),
-                        request.middleName(),
-                        request.lastName(),
-                        birthDate,
-                        searchGender
-                );
+        // 2. Name Matching (Flexible)
+        if (StringUtils.hasText(request.firstName())) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.lower(root.get("firstName")), request.firstName().toLowerCase()));
+        }
 
-        return memberMapper.convertToResponse(foundMembers);
+        if (StringUtils.hasText(request.middleName())) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.lower(root.get("middleName")), request.middleName().toLowerCase()));
+        }
+
+        if (StringUtils.hasText(request.lastName())) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.lower(root.get("lastName")), request.lastName().toLowerCase()));
+        }
+
+        // 3. Date of Birth Matching
+        if (StringUtils.hasText(request.dob())) {
+            LocalDate birthDate = LocalDate.parse(request.dob());
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("dob"), birthDate));
+        }
+
+        // 4. Optional Filters (Village/Gotra) to narrow down matches
+        if (StringUtils.hasText(request.paternalVillage())) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.lower(root.get("paternalVillage")), request.paternalVillage().toLowerCase()));
+        }
+
+//        if (request.gotra() != null) {
+//            spec = spec.and((root, query, cb) ->
+//                    cb.equal(root.get("paternalGotra").get("id"), request.gotra()));
+//        }
+        List<Member> foundMembers = memberRepository.findAll(spec);
+        if (request.gotra() != null) {
+            return memberMapper.convertToResponse(foundMembers, request.gotra());
+        } else {
+            return memberMapper.convertToResponse(foundMembers);
+        }
     }
 
     @Override

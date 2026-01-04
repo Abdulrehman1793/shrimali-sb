@@ -21,7 +21,7 @@ public record DiscoverySearchRequest(
         @Pattern(regexp = "^[a-zA-Z\\s]*$", message = "Last name must contain only English letters")
         String lastName,
 
-        @NotBlank String dob,
+        String dob,
         @NotNull Long gotra,
         String gender,
         String relationType,

@@ -5,6 +5,7 @@ import com.shrimali.exceptions.BadRequestException;
 import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MaritalStatus;
 import com.shrimali.model.enums.MembershipStatus;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberGotra;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @Service
@@ -101,6 +103,18 @@ public class MemberProfileServiceImpl implements MemberProfileService {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
         Member member = currentIdentity.member();
 
+        // 1. Perform Age vs Marital Status Validation
+        if (dto.getDob() != null && dto.getMaritalStatus() != null) {
+            int age = Period.between(dto.getDob(), LocalDate.now()).getYears();
+
+            // Basic check: Cannot be Married, Divorced, or Widowed if under 18
+            boolean isMarkedMarried = dto.getMaritalStatus() != MaritalStatus.SINGLE;
+
+            if (age < 18 && isMarkedMarried) {
+                throw new BadRequestException("Member must be at least 18 years old to have a marital status other than Single.");
+            }
+        }
+
         member.setDob(dto.getDob());
         member.setFirstName(dto.getFirstName());
         member.setMiddleName(dto.getMiddleName());
@@ -129,86 +143,102 @@ public class MemberProfileServiceImpl implements MemberProfileService {
 
     @Override
     @Transactional
-    public void updateFatherDetails(DiscoverySearchRequest dto) {
+    public void updateFatherDetails(MemberPayload dto) {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
         Member member = currentIdentity.member();
 
-        Member newMember = Member.builder()
-                .firstName(dto.firstName())
-                .middleName(dto.middleName())
-                .lastName(dto.lastName())
-                .dob(LocalDate.parse(dto.dob()))
-                .owner(currentIdentity.user())
-                .gender(Gender.Male)
-                .maritalStatus("married")
-                .membershipStatus(MembershipStatus.ACTIVE)
-                .paternalVillage(dto.paternalVillage())
-                .naniyalVillage(dto.naniyalVillage())
-                .paternalGotra(member.getPaternalGotra())
-                .deceased(dto.deceased() != null ? dto.deceased() : false)
-                .build();
+        Member savedMember;
+        if (dto.memberId() != null) {
+            savedMember = memberRepository
+                    .findById(dto.memberId()).orElseThrow(() -> new BadRequestException("Member not found"));
+        } else {
+            savedMember = memberRepository.save(
+                    Member.builder()
+                            .firstName(dto.firstName())
+                            .middleName(dto.middleName())
+                            .lastName(dto.lastName())
+                            .dob(LocalDate.parse(dto.dob()))
+                            .owner(currentIdentity.user())
+                            .gender(Gender.Male)
+                            .maritalStatus(MaritalStatus.MARRIED)
+                            .membershipStatus(MembershipStatus.ACTIVE)
+                            .paternalVillage(dto.paternalVillage())
+                            .naniyalVillage(dto.naniyalVillage())
+                            .paternalGotra(member.getPaternalGotra())
+                            .deceased(dto.deceased() != null ? dto.deceased() : false)
+                            .build());
+        }
 
-        Member savedNewMember = memberRepository.save(newMember);
-
-        member.setFather(savedNewMember);
+        member.setFather(savedMember);
         memberRepository.save(member);
     }
 
     @Override
     @Transactional
-    public void updateMotherDetails(DiscoverySearchRequest dto) {
+    public void updateMotherDetails(MemberPayload dto) {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
         Member member = currentIdentity.member();
 
-        Member newMember = Member.builder()
-                .firstName(dto.firstName())
-                .middleName(dto.middleName())
-                .lastName(dto.lastName())
-                .dob(LocalDate.parse(dto.dob()))
-                .owner(currentIdentity.user())
-                .gender(Gender.Female)
-                .maritalStatus("married")
-                .membershipStatus(MembershipStatus.ACTIVE)
-                .paternalVillage(dto.paternalVillage())
-                .naniyalVillage(dto.naniyalVillage())
-                .paternalGotra(member.getPaternalGotra())
-                .deceased(dto.deceased() != null ? dto.deceased() : false)
-                .build();
+        Member savedMember;
+        if (dto.memberId() != null) {
+            savedMember = memberRepository
+                    .findById(dto.memberId()).orElseThrow(() -> new BadRequestException("Member not found"));
+        } else {
+            savedMember = memberRepository.save(
+                    Member.builder()
+                            .firstName(dto.firstName())
+                            .middleName(dto.middleName())
+                            .lastName(dto.lastName())
+                            .dob(LocalDate.parse(dto.dob()))
+                            .owner(currentIdentity.user())
+                            .gender(Gender.Female)
+                            .maritalStatus(MaritalStatus.MARRIED)
+                            .membershipStatus(MembershipStatus.ACTIVE)
+                            .paternalVillage(dto.paternalVillage())
+                            .naniyalVillage(dto.naniyalVillage())
+                            .paternalGotra(member.getPaternalGotra())
+                            .deceased(dto.deceased() != null ? dto.deceased() : false)
+                            .build());
+        }
 
-        Member savedNewMember = memberRepository.save(newMember);
-
-        member.setMother(savedNewMember);
+        member.setMother(savedMember);
         memberRepository.save(member);
     }
 
     @Override
     @Transactional
-    public void updateSpouseDetails(DiscoverySearchRequest dto) {
+    public void updateSpouseDetails(MemberPayload dto) {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
         Member member = currentIdentity.member();
 
-        Member newMember = Member.builder()
-                .firstName(dto.firstName())
-                .middleName(dto.middleName())
-                .lastName(dto.lastName())
-                .dob(LocalDate.parse(dto.dob()))
-                .owner(currentIdentity.user())
-                .maritalStatus("married")
-                .membershipStatus(MembershipStatus.ACTIVE)
-                .paternalVillage(dto.paternalVillage())
-                .naniyalVillage(dto.naniyalVillage())
-                .paternalGotra(member.getPaternalGotra())
-                .deceased(dto.deceased() != null ? dto.deceased() : false)
-                .build();
+        Member savedMember;
+        if (dto.memberId() != null) {
+            savedMember = memberRepository
+                    .findById(dto.memberId()).orElseThrow(() -> new BadRequestException("Member not found"));
+        } else {
+            Member newMember = Member.builder()
+                    .firstName(dto.firstName())
+                    .middleName(dto.middleName())
+                    .lastName(dto.lastName())
+                    .dob(LocalDate.parse(dto.dob()))
+                    .owner(currentIdentity.user())
+                    .maritalStatus(MaritalStatus.MARRIED)
+                    .membershipStatus(MembershipStatus.ACTIVE)
+                    .paternalVillage(dto.paternalVillage())
+                    .naniyalVillage(dto.naniyalVillage())
+                    .paternalGotra(member.getPaternalGotra())
+                    .deceased(dto.deceased() != null ? dto.deceased() : false)
+                    .build();
 
-        if (member.getGender() == Gender.Female)
-            newMember.setGender(Gender.Male);
-        else
-            newMember.setGender(Gender.Female);
+            if (member.getGender() == Gender.Female)
+                newMember.setGender(Gender.Male);
+            else
+                newMember.setGender(Gender.Female);
 
-        Member savedNewMember = memberRepository.save(newMember);
+            savedMember = memberRepository.save(newMember);
+        }
 
-        member.setSpouse(savedNewMember);
+        member.setSpouse(savedMember);
         memberRepository.save(member);
     }
 
