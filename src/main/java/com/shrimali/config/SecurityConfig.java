@@ -120,7 +120,6 @@ public class SecurityConfig {
     @Bean
     public FilterRegistrationBean<RequestAuditFilter> registration(RequestAuditFilter filter) {
         FilterRegistrationBean<RequestAuditFilter> registration = new FilterRegistrationBean<>(filter);
-        // This tells Spring Boot: "Don't register this automatically with the Servlet container"
         registration.setEnabled(true);
         return registration;
     }

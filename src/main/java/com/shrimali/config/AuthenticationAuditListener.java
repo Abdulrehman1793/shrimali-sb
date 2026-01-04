@@ -14,9 +14,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AuthenticationAuditListener {
 
-    // Assuming you have an AuditService to persist these to the DB
-    // private final AuditService auditService;
-
     @EventListener
     public void onSuccess(AuthenticationSuccessEvent event) {
         Authentication auth = event.getAuthentication();

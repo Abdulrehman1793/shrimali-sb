@@ -30,8 +30,7 @@ public class DatabaseBackupScheduler {
     @Value("${app.backup.bin-path}")
     private String pgDumpPath;
 
-    //    @Scheduled(cron = "${app.backup.cron}")
-    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(cron = "${app.backup.cron}")
     public void executeBackup() {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"));
         String fileName = dbName + "_" + timestamp + ".sql";

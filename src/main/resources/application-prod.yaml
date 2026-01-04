@@ -105,7 +105,7 @@ app:
 
   backup:
     bin-path: "C:/Program Files/PostgreSQL/17/bin/pg_dump.exe"
-    cron: "0 0 1 * * ?" # Every day at 1 AM
+    cron: "0 0 */1 * * ?"
     path: "./backups/"
     database: ${PG_DB_NAME}
     username: ${PG_USERNAME}
