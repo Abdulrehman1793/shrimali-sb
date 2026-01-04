@@ -52,6 +52,7 @@ spring:
 
   # --- SECURITY (OAuth2) ---
   security:
+    debug: true
     oauth2:
       client:
         registration:
