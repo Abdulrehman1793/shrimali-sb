@@ -1,5 +1,8 @@
 package com.shrimali.model.enums;
 
 public enum ClaimStatus {
-    PENDING, APPROVED, REJECTED
+    PENDING,    // Waiting for current owner
+    APPROVED,   // Transfer complete
+    REJECTED,   // Owner said no
+    DISPUTED    // Sent to Admin for ID check
 }
