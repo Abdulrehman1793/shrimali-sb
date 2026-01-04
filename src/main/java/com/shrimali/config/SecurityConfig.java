@@ -5,6 +5,7 @@ import com.shrimali.modules.auth.service.security.CustomOidcUserService;
 import com.shrimali.modules.auth.service.security.CustomUserDetailsService;
 import com.shrimali.modules.auth.service.security.HttpCookieOAuth2AuthorizationRequestRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -114,5 +115,13 @@ public class SecurityConfig {
     public AuthenticationEventPublisher authenticationEventPublisher
             (ApplicationEventPublisher applicationEventPublisher) {
         return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
+    }
+
+    @Bean
+    public FilterRegistrationBean<RequestAuditFilter> registration(RequestAuditFilter filter) {
+        FilterRegistrationBean<RequestAuditFilter> registration = new FilterRegistrationBean<>(filter);
+        // This tells Spring Boot: "Don't register this automatically with the Servlet container"
+        registration.setEnabled(true);
+        return registration;
     }
 }

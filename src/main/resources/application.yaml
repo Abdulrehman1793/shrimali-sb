@@ -111,6 +111,7 @@ app:
     database: ${PG_DB_NAME}
     username: ${PG_USERNAME}
     password: ${PG_PASSWORD}
+
   admins:
     - pradipnsharma@gmail.com
     - abdul.khan@actionabl.ai
