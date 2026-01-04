@@ -31,6 +31,9 @@ public class Gotra {
     @Column(length = 100, unique = true, nullable = false)
     private String name;
 
+    @Column(name = "name_hi", length = 100)
+    private String nameHi;
+
     @Column(columnDefinition = "text")
     private String description;
 
