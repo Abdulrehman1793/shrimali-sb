@@ -59,7 +59,7 @@ public class MemberProfileController {
      * The current member becomes the 'Owner' of the newly created profile.
      */
     @PutMapping("/father")
-    public ResponseEntity<Void> updateFatherDetails(@RequestBody DiscoverySearchRequest dto) {
+    public ResponseEntity<Void> updateFatherDetails(@Valid @RequestBody DiscoverySearchRequest dto) {
         memberProfileService.updateFatherDetails(dto);
         return ResponseEntity.noContent().build();
     }
@@ -69,7 +69,7 @@ public class MemberProfileController {
      * The current member becomes the 'Owner' of the newly created profile.
      */
     @PutMapping("/mother")
-    public ResponseEntity<Void> updateMotherDetails(@RequestBody DiscoverySearchRequest dto) {
+    public ResponseEntity<Void> updateMotherDetails(@Valid @RequestBody DiscoverySearchRequest dto) {
         memberProfileService.updateMotherDetails(dto);
         return ResponseEntity.noContent().build();
     }
@@ -79,7 +79,7 @@ public class MemberProfileController {
      * The current member becomes the 'Owner' of the newly created profile.
      */
     @PutMapping("/spouse")
-    public ResponseEntity<Void> updateSpouseDetails(@RequestBody DiscoverySearchRequest dto) {
+    public ResponseEntity<Void> updateSpouseDetails(@Valid @RequestBody DiscoverySearchRequest dto) {
         memberProfileService.updateSpouseDetails(dto);
         return ResponseEntity.noContent().build();
     }
