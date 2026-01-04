@@ -1,7 +1,10 @@
 package com.shrimali.modules.member.services.impl;
 
 import com.shrimali.dto.PagedResponse;
+import com.shrimali.exceptions.BadRequestException;
 import com.shrimali.model.enums.Gender;
+import com.shrimali.model.enums.MemberStatus;
+import com.shrimali.model.enums.MembershipStatus;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberContact;
 import com.shrimali.modules.member.dto.*;
@@ -40,42 +43,78 @@ public class MemberSearchServiceImpl implements MemberSearchService {
 
     @Override
     public PagedResponse<MemberListItem> listMembers(MemberFilterRequest filters, Pageable pageable) {
-        Specification<Member> spec = Specification.where((root, query, cb) -> cb.conjunction());
+        // 1. Check if status is provided; default to APPROVED if null for safety
+        String statusStr = filters.status() != null ? filters.status().toString() : "APPROVED";
+        boolean isApprovedStatus = "APPROVED".equalsIgnoreCase(statusStr);
+        boolean isGuestStatus = MemberStatus.GUEST.toString()
+                .equalsIgnoreCase(filters.status().toString());
 
-        // 1. Handle Global Search (q) - matches firstName, lastName, or email
-        if (StringUtils.hasText(filters.q())) {
-            String pattern = "%" + filters.q().toLowerCase() + "%";
-            spec = spec.and((root, query, cb) -> {
-                return cb.or(
-                        cb.like(cb.lower(root.get("firstName")), pattern),
-                        cb.like(cb.lower(root.get("lastName")), pattern),
-                        cb.like(cb.lower(root.get("membershipNumber")), pattern)
-                );
-            });
+        // 2. Logic: If status is APPROVED, check if at least one other filter exists
+        boolean hasOtherFilters = StringUtils.hasText(filters.q()) ||
+                StringUtils.hasText(filters.village()) ||
+                StringUtils.hasText(filters.gotra()) ||
+                (StringUtils.hasText(filters.maritalStatus()) && !"none".equalsIgnoreCase(filters.maritalStatus()));
+
+        // 3. Strict Requirement: Approved members cannot be listed without a search/filter
+        if (isApprovedStatus && !hasOtherFilters) {
+            return memberMapper.mapToPagedResponse(Page.empty(pageable));
         }
 
-        // 2. Filter by Village (Exact match)
+        // 4. Always filter by status first
+        Specification<Member> spec = Specification.where((root, query, cb) ->
+                cb.conjunction());
+
+        // 5. Apply Global Search (q)
+        if (StringUtils.hasText(filters.q())) {
+            String pattern = "%" + filters.q().toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("firstName")), pattern),
+                    cb.like(cb.lower(root.get("lastName")), pattern),
+                    cb.like(cb.lower(root.get("membershipNumber")), pattern)
+            ));
+        }
+
+        // 6. Filter by Village
         if (StringUtils.hasText(filters.village())) {
             spec = spec.and((root, query, cb) ->
                     cb.equal(root.get("village"), filters.village()));
         }
 
-        // 3. Filter by Gotra (Exact match)
+        // 7. Filter by Paternal Gotra (Handling the ManyToOne relationship)
         if (StringUtils.hasText(filters.gotra())) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("gotra"), filters.gotra()));
+            try {
+                Long gotraId = Long.parseLong(filters.gotra());
+                spec = spec.and((root, query, cb) ->
+                        cb.equal(root.get("paternalGotra").get("id"), gotraId)
+                );
+            } catch (NumberFormatException e) {
+                // Log error or ignore if the ID is not a valid number
+            }
         }
 
-        // 4. Filter by Marital Status (Exact match)
+        // 8. Filter by Marital Status
         if (StringUtils.hasText(filters.maritalStatus()) && !"none".equalsIgnoreCase(filters.maritalStatus())) {
             spec = spec.and((root, query, cb) ->
                     cb.equal(root.get("maritalStatus"), filters.maritalStatus()));
         }
 
-        // Execute query with specification and pagination
-        Page<Member> memberPage = memberRepository.findAll(spec, pageable);
+        if (isGuestStatus) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("membershipStatus"), MembershipStatus.PENDING_APPROVAL.toString()));
+        }
 
-        // Convert Page<Member> to PagedResponse<MemberListItem>
+        if (isApprovedStatus) {
+            spec = spec.and((root, query, cb) ->
+                    cb.and(
+                            // Exclude Pending
+                            cb.notEqual(root.get("membershipStatus"), MembershipStatus.PENDING_APPROVAL),
+                            // Exclude Rejected
+                            cb.notEqual(root.get("membershipStatus"), MembershipStatus.REJECTED)
+                    )
+            );
+        }
+
+        Page<Member> memberPage = memberRepository.findAll(spec, pageable);
         return memberMapper.mapToPagedResponse(memberPage);
     }
 
@@ -85,7 +124,8 @@ public class MemberSearchServiceImpl implements MemberSearchService {
     }
 
     @Override
-    public MemberResponse getMember(Long memberId) {
+    public MemberDetailResponse getMember(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new BadRequestException("Member not found"));
         return null;
     }
 

@@ -48,9 +48,9 @@ public interface MemberSearchService {
      * </p>
      *
      * @param memberId The unique database ID of the member to match against.
-     * @return A {@link MemberMatchResponse} containing filtered data suitable for comparison.
+     * @return A {@link MemberDetailResponse} containing filtered data suitable for comparison.
      */
-    MemberResponse getMember(Long memberId);
+    MemberDetailResponse getMember(Long memberId);
 
     DiscoveryResponse discoverExistingMember(DiscoverySearchRequest request);
 

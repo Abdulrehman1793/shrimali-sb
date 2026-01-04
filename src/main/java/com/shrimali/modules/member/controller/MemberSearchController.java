@@ -53,7 +53,7 @@ public class MemberSearchController {
     @GetMapping
     public ResponseEntity<PagedResponse<MemberListItem>> getMembersPaged(
             // Spring maps ?village=xyz&gotra=abc automatically to this object
-            MemberFilterRequest filters,
+            @Valid MemberFilterRequest filters,
             @RequestParam(value = "page", defaultValue = "0") @Min(0) int page,
             @RequestParam(value = "size", defaultValue = "20") @Min(1) int size) {
 
@@ -84,7 +84,7 @@ public class MemberSearchController {
      * This is used when clicking on a member's card in the directory.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<MemberResponse> getMember(@PathVariable Long id) {
+    public ResponseEntity<MemberDetailResponse> getMember(@PathVariable Long id) {
         return ResponseEntity.ok(memberSearchService.getMember(id));
     }
 

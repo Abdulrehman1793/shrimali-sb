@@ -91,7 +91,7 @@ public class MemberMapper {
 
     public MemberListItem toListItem(Member m) {
         if (m == null) return null;
-        return MemberListItem.builder()
+        MemberListItem listItem = MemberListItem.builder()
                 .id(m.getId())
                 .firstName(m.getFirstName())
                 .middleName(m.getMiddleName())
@@ -100,8 +100,13 @@ public class MemberMapper {
                 .dob(m.getDob())
                 .photoUrl(m.getPhotoUrl())
                 .thumbnailUrl(m.getThumbnailUrl())
+                .membershipNumber(m.getMembershipNumber())
                 .notes(m.getNotes())
+                .email(m.getOwner() != null ? m.getOwner().getEmail() : null)
                 .build();
+
+
+        return listItem;
     }
 
     public PagedResponse<MemberListItem> mapToPagedResponse(Page<Member> page) {
