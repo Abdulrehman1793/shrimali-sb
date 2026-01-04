@@ -55,7 +55,9 @@ public class BasicInfoDTO {
     private String kuldevi;
     private String membershipNumber;
 
+    @Pattern(regexp = "^[a-zA-Z\\s]*$", message = "Paternal village must contain only English letters")
     private String paternalVillage;
+    @Pattern(regexp = "^[a-zA-Z\\s]*$", message = "Naniyal village must contain only English letters")
     private String naniyalVillage;
 
     private Set<String> spokenLanguages;

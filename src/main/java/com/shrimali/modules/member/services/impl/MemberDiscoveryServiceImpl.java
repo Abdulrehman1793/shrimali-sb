@@ -131,6 +131,11 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
             throw new BadRequestException("This profile has already been claimed.");
         }
 
+        if (existingMember.isDeceased()) {
+            // "Claimed decease" sounds a bit awkward; "claimed for a deceased member" is clearer.
+            throw new BadRequestException("A profile marked as deceased cannot be claimed.");
+        }
+
         // 1. Link the profile to the current user
         existingMember.setLinkedUser(currentUser);
         existingMember.setOwner(currentUser);

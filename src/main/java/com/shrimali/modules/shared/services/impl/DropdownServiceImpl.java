@@ -1,5 +1,6 @@
 package com.shrimali.modules.shared.services.impl;
 
+import com.shrimali.model.Gotra;
 import com.shrimali.modules.shared.dto.DropdownDTO;
 import com.shrimali.modules.shared.services.DropdownService;
 import com.shrimali.repositories.GotraRepository;
@@ -18,11 +19,12 @@ public class DropdownServiceImpl implements DropdownService {
 
     @Override
     public List<DropdownDTO> getAll() {
-        return gotraRepository.findAll(Sort.by(Sort.Direction.ASC, "name"))
-                .stream()
+        List<Gotra> gotras = gotraRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
+
+        return gotras.stream()
                 .map(g -> DropdownDTO.builder()
                         .id(g.getId())
-                        .name(g.getName())
+                        .name(String.format("%s - (%s)", g.getNameHi(), g.getName()))
                         .build())
                 .toList();
     }

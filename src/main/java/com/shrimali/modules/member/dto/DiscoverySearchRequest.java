@@ -25,7 +25,9 @@ public record DiscoverySearchRequest(
         @NotNull Long gotra,
         String gender,
         String relationType,
+        @Pattern(regexp = "^[a-zA-Z\\s]*$", message = "Paternal village must contain only English letters")
         String paternalVillage,
+        @Pattern(regexp = "^[a-zA-Z\\s]*$", message = "Naniyal village must contain only English letters")
         String naniyalVillage,
         Boolean deceased
 ) {
