@@ -1,5 +1,6 @@
 package com.shrimali.modules.member.dto;
 
+import com.shrimali.model.enums.MaritalStatus;
 import com.shrimali.model.enums.MemberStatus;
 import jakarta.validation.constraints.Pattern;
 
@@ -11,6 +12,6 @@ public record MemberFilterRequest(
         String q,
         String village,
         String gotra,
-        String maritalStatus,
+        MaritalStatus maritalStatus,
         MemberStatus status
 ) {}

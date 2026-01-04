@@ -53,7 +53,7 @@ public class MemberSearchServiceImpl implements MemberSearchService {
         boolean hasOtherFilters = StringUtils.hasText(filters.q()) ||
                 StringUtils.hasText(filters.village()) ||
                 StringUtils.hasText(filters.gotra()) ||
-                (StringUtils.hasText(filters.maritalStatus()) && !"none".equalsIgnoreCase(filters.maritalStatus()));
+                (filters.maritalStatus() != null);
 
         // 3. Strict Requirement: Approved members cannot be listed without a search/filter
         if (isApprovedStatus && !hasOtherFilters) {
@@ -93,7 +93,7 @@ public class MemberSearchServiceImpl implements MemberSearchService {
         }
 
         // 8. Filter by Marital Status
-        if (StringUtils.hasText(filters.maritalStatus()) && !"none".equalsIgnoreCase(filters.maritalStatus())) {
+        if (filters.maritalStatus() != null) {
             spec = spec.and((root, query, cb) ->
                     cb.equal(root.get("maritalStatus"), filters.maritalStatus()));
         }
