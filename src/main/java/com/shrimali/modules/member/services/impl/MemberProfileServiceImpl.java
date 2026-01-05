@@ -46,13 +46,15 @@ public class MemberProfileServiceImpl implements MemberProfileService {
     }
 
     @Override
-    public MemberProfileResponse getCurrentMemberProfile(Long memberId) {
+    @Transactional
+    public MemberProfileResponse getCurrentMemberProfile(String memberShipNumber) {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
         Member currentMember = currentIdentity.member();
         User currentUser = currentIdentity.user();
 
-        if (memberId != null) {
-            currentMember = memberRepository.findById(memberId).orElseThrow(() -> new BadRequestException("Member id not found"));
+        if (memberShipNumber != null) {
+            currentMember = memberRepository.findByMembershipNumber(memberShipNumber)
+                    .orElseThrow(() -> new BadRequestException("Member record not found"));
         }
 
         String gotra = "";

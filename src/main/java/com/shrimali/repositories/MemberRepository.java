@@ -70,4 +70,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>, JpaSpecif
             String lastName,
             LocalDate dob
     );
+
+    Optional<Member> findByMembershipNumber(String membershipNumber);
 }
