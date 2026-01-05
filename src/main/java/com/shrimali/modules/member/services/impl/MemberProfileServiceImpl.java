@@ -46,10 +46,14 @@ public class MemberProfileServiceImpl implements MemberProfileService {
     }
 
     @Override
-    public MemberProfileResponse getCurrentMemberProfile() {
+    public MemberProfileResponse getCurrentMemberProfile(Long memberId) {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
         Member currentMember = currentIdentity.member();
         User currentUser = currentIdentity.user();
+
+        if (memberId != null) {
+            currentMember = memberRepository.findById(memberId).orElseThrow(() -> new BadRequestException("Member id not found"));
+        }
 
         String gotra = "";
         List<MemberGotra> gotras = memberGotraRepository.findByMemberId(currentMember.getId());

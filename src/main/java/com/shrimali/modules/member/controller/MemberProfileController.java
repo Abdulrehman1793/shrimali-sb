@@ -27,9 +27,11 @@ public class MemberProfileController {
      * Retrieves the deep profile data for the current member.
      * Accessible via: GET /api/v1/members/profile
      */
-    @GetMapping
-    public ResponseEntity<MemberProfileResponse> getMyProfile() {
-        return ResponseEntity.ok(memberProfileService.getCurrentMemberProfile());
+    @GetMapping({"", "/{memberId}"})
+    public ResponseEntity<MemberProfileResponse> getMyProfile(
+            @PathVariable(required = false) Long memberId
+    ) {
+        return ResponseEntity.ok(memberProfileService.getCurrentMemberProfile(memberId));
     }
 
     /**

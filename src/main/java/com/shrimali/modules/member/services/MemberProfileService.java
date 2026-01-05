@@ -16,7 +16,7 @@ public interface MemberProfileService {
     /**
      * Gets the full profile details for the dashboard.
      */
-    MemberProfileResponse getCurrentMemberProfile();
+    MemberProfileResponse getCurrentMemberProfile(Long memberId);
 
     /**
      * Updates basic identity info (Name, DOB, Gender).
