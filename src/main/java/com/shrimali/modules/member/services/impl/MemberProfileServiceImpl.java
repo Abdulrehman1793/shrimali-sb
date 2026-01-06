@@ -105,9 +105,14 @@ public class MemberProfileServiceImpl implements MemberProfileService {
 
     @Override
     @Transactional
-    public void updateBasicInfo(BasicInfoDTO dto) {
+    public void updateBasicInfo(String membershipNumber, BasicInfoDTO dto) {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
         Member member = currentIdentity.member();
+
+        if (membershipNumber != null && !membershipNumber.equalsIgnoreCase("self")) {
+            member = memberRepository.findByMembershipNumber(membershipNumber)
+                    .orElseThrow(() -> new BadRequestException("Member record not found"));
+        }
 
         // 1. Perform Age vs Marital Status Validation
         if (dto.getDob() != null && dto.getMaritalStatus() != null) {

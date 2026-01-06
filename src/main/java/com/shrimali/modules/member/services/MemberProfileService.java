@@ -22,13 +22,15 @@ public interface MemberProfileService {
      * Updates basic identity info (Name, DOB, Gender).
      * Should be blocked if profile is verified or locked.
      */
-    void updateBasicInfo(BasicInfoDTO dto);
+    void updateBasicInfo(String membershipNumber, BasicInfoDTO dto);
 
     /**
      * Specialized updates for family tree links.
      */
     void updateFatherDetails(MemberPayload dto);
+
     void updateMotherDetails(MemberPayload dto);
+
     void updateSpouseDetails(MemberPayload dto);
 
     /**

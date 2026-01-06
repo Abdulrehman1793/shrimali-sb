@@ -45,9 +45,10 @@ public class MemberProfileController {
     /**
      * Updates the authenticated user's core identity details.
      */
-    @PutMapping("/basic-info")
-    public ResponseEntity<Void> updateBasicInfo(@Valid @RequestBody BasicInfoDTO dto) {
-        memberProfileService.updateBasicInfo(dto);
+    @PutMapping("/{membershipNumber}/basic-info")
+    public ResponseEntity<Void> updateBasicInfo(
+            @PathVariable String membershipNumber, @Valid @RequestBody BasicInfoDTO dto) {
+        memberProfileService.updateBasicInfo(membershipNumber, dto);
         return ResponseEntity.noContent().build();
     }
 

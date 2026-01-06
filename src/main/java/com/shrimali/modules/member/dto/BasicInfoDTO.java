@@ -50,7 +50,7 @@ public class BasicInfoDTO {
     private String bloodGroup;
     private MaritalStatus maritalStatus;
     private String profession;
-    private String secondaryProfession;
+    private Set<String> secondaryProfession;
     private String education;
     private String notes;
     private String kuldevi;

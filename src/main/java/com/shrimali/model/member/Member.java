@@ -91,8 +91,13 @@ public class Member {
     @Column(name = "blood_group")
     private String bloodGroup;
 
+    @ElementCollection
+    @CollectionTable(
+            name = "member_secondary_professions",
+            joinColumns = @JoinColumn(name = "member_id")
+    )
     @Column(name = "secondary_profession")
-    private String secondaryProfession;
+    private Set<String> secondaryProfession = new HashSet<>();
 
     private String education;
 
