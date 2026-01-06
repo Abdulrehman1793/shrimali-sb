@@ -175,13 +175,13 @@ public class MemberController {
             @RequestParam(value = "isThumbnail", defaultValue = "false") boolean isThumbnail
     ) {
         // Now passes the isThumbnail flag to the service logic
-        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(fileName, contentType, isThumbnail);
+        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(null, fileName, contentType, isThumbnail);
         return ResponseEntity.ok(presignedUrl);
     }
 
     @PatchMapping("/update-photo-path")
     public ResponseEntity<ProfilePhotoResponse> updatePhotoPath(@RequestBody UpdatePhotoRequest request) {
-        String photoUrl = imageUploadService.updateMemberPhoto(request.getPhotoUrl(), request.getThumbnailUrl());
+        String photoUrl = imageUploadService.updateMemberPhoto(null, request.getPhotoUrl(), request.getThumbnailUrl());
 
         return ResponseEntity.ok(new ProfilePhotoResponse(photoUrl));
     }

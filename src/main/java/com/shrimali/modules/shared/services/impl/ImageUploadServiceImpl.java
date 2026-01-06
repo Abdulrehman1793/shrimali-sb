@@ -1,7 +1,6 @@
 package com.shrimali.modules.shared.services.impl;
 
 import com.shrimali.exceptions.BadRequestException;
-import com.shrimali.model.auth.User;
 import com.shrimali.model.member.Member;
 import com.shrimali.modules.shared.dto.PresignedUrlResponse;
 import com.shrimali.modules.shared.services.ImageUploadService;
@@ -87,9 +86,8 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     }
 
     @Override
-    public PresignedUrlResponse getPresignedUploadUrl(String fileName, String contentType, boolean isThumbnail) {
-        User currentUser = securityUtils.getCurrentUser();
-        Member member = memberRepository.findById(currentUser.getMemberId())
+    public PresignedUrlResponse getPresignedUploadUrl(String membershipNumber, String fileName, String contentType, boolean isThumbnail) {
+        Member member = memberRepository.findByMembershipNumber(membershipNumber)
                 .orElseThrow(() -> new BadRequestException("Member not found"));
 
         String folder = isThumbnail ? "thumbnails" : "originals";
@@ -130,10 +128,8 @@ public class ImageUploadServiceImpl implements ImageUploadService {
 
     @Override
     @Transactional
-    public String updateMemberPhoto(String s3Key, String thumbnailUrl) {
-        User currentUser = securityUtils.getCurrentUser();
-
-        Member member = memberRepository.findById(currentUser.getMemberId())
+    public String updateMemberPhoto(String membershipNumber, String s3Key, String thumbnailUrl) {
+        Member member = memberRepository.findByMembershipNumber(membershipNumber)
                 .orElseThrow(() -> new BadRequestException("Member not found"));
 
         // Update the field in your DB entity

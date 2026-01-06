@@ -8,7 +8,7 @@ import java.security.Principal;
 public interface ImageUploadService {
     String uploadProfilePhoto(Principal principal, MultipartFile file);
 
-    PresignedUrlResponse getPresignedUploadUrl(String fileName, String contentType, boolean isThumbnail);
+    PresignedUrlResponse getPresignedUploadUrl(String membershipNumber, String fileName, String contentType, boolean isThumbnail);
 
-    String updateMemberPhoto(String original, String thumbnailUrl);
+    String updateMemberPhoto(String membershipNumber, String original, String thumbnailUrl);
 }

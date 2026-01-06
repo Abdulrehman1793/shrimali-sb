@@ -25,20 +25,16 @@ import org.springframework.web.bind.annotation.*;
 public class MemberMediaController {
     private final ImageUploadService imageUploadService;
 
-    @GetMapping("/photo-upload-url")
-    public ResponseEntity<PresignedUrlResponse> getUploadUrl(
-            @RequestParam("fileName") String fileName,
-            @RequestParam("contentType") String contentType,
-            @RequestParam(value = "isThumbnail", defaultValue = "false") boolean isThumbnail
-    ) {
+    @GetMapping("/{membershipNumber}/photo-upload-url")
+    public ResponseEntity<PresignedUrlResponse> getUploadUrl(@PathVariable String membershipNumber, @RequestParam("fileName") String fileName, @RequestParam("contentType") String contentType, @RequestParam(value = "isThumbnail", defaultValue = "false") boolean isThumbnail) {
         // Now passes the isThumbnail flag to the service logic
-        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(fileName, contentType, isThumbnail);
+        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(membershipNumber, fileName, contentType, isThumbnail);
         return ResponseEntity.ok(presignedUrl);
     }
 
-    @PatchMapping("/update-photo-path")
-    public ResponseEntity<ProfilePhotoResponse> updatePhotoPath(@RequestBody UpdatePhotoRequest request) {
-        String photoUrl = imageUploadService.updateMemberPhoto(request.getPhotoUrl(), request.getThumbnailUrl());
+    @PatchMapping("/{membershipNumber}/update-photo-path")
+    public ResponseEntity<ProfilePhotoResponse> updatePhotoPath(@PathVariable String membershipNumber, @RequestBody UpdatePhotoRequest request) {
+        String photoUrl = imageUploadService.updateMemberPhoto(membershipNumber, request.getPhotoUrl(), request.getThumbnailUrl());
 
         return ResponseEntity.ok(new ProfilePhotoResponse(photoUrl));
     }
