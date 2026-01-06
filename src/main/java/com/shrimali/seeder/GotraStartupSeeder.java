@@ -53,28 +53,54 @@ public class GotraStartupSeeder implements ApplicationRunner {
        ============================ */
 
     private Gotra seedCore(String nameHi, String name, String description) {
-        return gotraRepository.findByNameIgnoreCase(name)
-                .orElseGet(() -> {
-                    Gotra gotra = new Gotra();
-                    gotra.setName(name);
-                    gotra.setNameHi(nameHi);
-                    gotra.setDescription(description);
-                    gotra.setCore(true);
-                    return gotraRepository.save(gotra);
-                });
+        Gotra gotra = gotraRepository.findByNameIgnoreCase(name)
+                .orElseGet(Gotra::new);
+
+        boolean isNew = gotra.getId() == null;
+
+        gotra.setName(name);
+        gotra.setCore(true);
+        gotra.setDescription(description);
+
+        // ✅ Update only if empty
+        if (gotra.getNameHi() == null || gotra.getNameHi().isBlank()) {
+            gotra.setNameHi(nameHi);
+            if (!isNew) {
+                log.info("Updated missing nameHi for core gotra: {}", name);
+            }
+        }
+
+        if (isNew) {
+            log.info("Seeding core gotra: {}", name);
+        }
+
+        return gotraRepository.save(gotra);
     }
 
     private void seedSub(String nameHi, String name, String description, Gotra parentGotra) {
-        gotraRepository.findByNameIgnoreCase(name)
-                .orElseGet(() -> {
-                    Gotra gotra = new Gotra();
-                    gotra.setName(name);
-                    gotra.setNameHi(nameHi);
-                    gotra.setDescription(description);
-                    gotra.setCore(false);
-                    gotra.setParentGotra(parentGotra);
-                    return gotraRepository.save(gotra);
-                });
+        Gotra gotra = gotraRepository.findByNameIgnoreCase(name)
+                .orElseGet(Gotra::new);
+
+        boolean isNew = gotra.getId() == null;
+
+        gotra.setName(name);
+        gotra.setCore(false);
+        gotra.setDescription(description);
+        gotra.setParentGotra(parentGotra);
+
+        // ✅ Update only if empty
+        if (gotra.getNameHi() == null || gotra.getNameHi().isBlank()) {
+            gotra.setNameHi(nameHi);
+            if (!isNew) {
+                log.info("Updated missing nameHi for sub gotra: {}", name);
+            }
+        }
+
+        if (isNew) {
+            log.info("Seeding sub gotra: {}", name);
+        }
+
+        gotraRepository.save(gotra);
     }
 }
 
