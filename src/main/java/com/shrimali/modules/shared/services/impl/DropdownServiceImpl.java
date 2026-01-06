@@ -19,7 +19,7 @@ public class DropdownServiceImpl implements DropdownService {
 
     @Override
     public List<DropdownDTO> getAll() {
-        List<Gotra> gotras = gotraRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
+        List<Gotra> gotras = gotraRepository.findAll(Sort.by(Sort.Direction.ASC, "displayOrder"));
 
         return gotras.stream()
                 .map(g -> DropdownDTO.builder()

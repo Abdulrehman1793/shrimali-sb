@@ -37,6 +37,9 @@ public class Gotra {
     @Column(columnDefinition = "text")
     private String description;
 
+    @Column(name = "display_order")
+    private Integer displayOrder;
+
     /**
      * Indicates whether this is a core Saptarishi gotra
      */

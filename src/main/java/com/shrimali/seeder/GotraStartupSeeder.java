@@ -25,34 +25,124 @@ public class GotraStartupSeeder implements ApplicationRunner {
         // ============================
 // Core Saptarishi Gotras
 // ============================
-        Gotra kashyap = seedCore("कश्यप", "Kashyap", "Descendants of Maharishi Kashyap, one of the Saptarishis.");
-        Gotra bharadwaj = seedCore("भारद्वाज", "Bharadwaj", "Lineage of Maharishi Bharadwaj, associated with Vedic scholarship.");
-        Gotra vashistha = seedCore("वशिष्ठ", "Vashistha", "Lineage of Maharishi Vashistha, royal priest of the Ikshvaku dynasty.");
-        Gotra gautam = seedCore("गौतम", "Gautam", "Descendants of Maharishi Gautama, founder of Nyaya philosophy.");
-        Gotra atri = seedCore("अत्रि", "Atri", "Descendants of Maharishi Atri, one of the Saptarishis.");
-        Gotra jamadagni = seedCore("जमदग्नि", "Jamadagni", "Lineage of Maharishi Jamadagni, father of Parashurama.");
-        Gotra kaushik = seedCore("कौशिक", "Kaushik", "Descendants of Maharishi Vishwamitra (Kaushika lineage).");
-        Gotra others = seedCore("अन्य", "Others", "Community members belonging to other recognized gotras or lineages.");
-// ============================
-// Extended / Sub-Gotras
-// ============================
-        seedSub("पराशर", "Parashar", "Lineage of Maharishi Parashar, father of Ved Vyasa.", vashistha);
-        seedSub("अगस्त्य", "Agastya", "Descendants of Maharishi Agastya, revered in North and South India.", atri);
-        seedSub("हारित", "Haritas", "Descendants of Maharishi Harita, linked to ancient Dharmashastras.", kashyap);
-        seedSub("वत्स", "Vatsa", "Lineage associated with Maharishi Vatsa.", bharadwaj);
-        seedSub("उपमन्यु", "Upamanyu", "Lineage of Maharishi Upamanyu, known for devotion and penance.", gautam);
-        seedSub("सांकृत", "Sankas", "Ancient gotra associated with the Shrimali Brahmin community.", kaushik);
-        seedSub("शांडिल्य", "Shandilya", "Lineage of Maharishi Shandilya, associated with Smriti traditions.", atri);
-        seedSub("कपिल", "Kapila", "Lineage of Maharishi Kapila, founder of Sankhya philosophy.", kashyap);
-        seedSub("मांडव्य", "Mandavya", "Lineage of Maharishi Mandavya, associated with penance and justice.", vashistha);
-        seedSub("लोहित", "Lohit", "Ancient lineage referenced in regional Brahmin traditions.", kashyap);
+        Gotra kashyap = seedCore(
+                "कश्यप",
+                "Kashyap",
+                "Descendants of Maharishi Kashyap, one of the Saptarishis.", 1
+        );
+
+        Gotra bharadwaj = seedCore(
+                "भारद्वाज",
+                "Bharadwaj",
+                "Lineage of Maharishi Bharadwaj, associated with Vedic scholarship.", 2
+        );
+
+        Gotra gautam = seedCore(
+                "गौतम",
+                "Gautam",
+                "Descendants of Maharishi Gautama, founder of Nyaya philosophy.", 3
+        );
+
+        Gotra kaushik = seedCore(
+                "कौशिक",
+                "Kaushik",
+                "Descendants of Maharishi Vishwamitra (Kaushika lineage).", 4
+        );
+
+        Gotra atri = seedCore(
+                "अत्रि",
+                "Atri",
+                "Descendants of Maharishi Atri, one of the Saptarishis.", 5
+        );
+
+        // Internal core (needed for correct lineage)
+        Gotra vashistha = seedCore(
+                "वशिष्ठ",
+                "Vashistha",
+                "Lineage of Maharishi Vashistha, preserved for Parashar gotra mapping.", 6
+        );
+        Gotra others = seedCore("अन्य", "Others", "Community members belonging to other recognized gotras or lineages.", 17);
+
+        // ============================
+        // Sub-Gotras (from updated array)
+        // ============================
+
+        seedSub(
+                "संकस",
+                "Sankas",
+                "Ancient gotra associated with the Shrimali Brahmin community.",
+                kaushik, 7
+        );
+
+        seedSub(
+                "वत्स",
+                "Vatsa",
+                "Lineage associated with Maharishi Vatsa.",
+                bharadwaj, 8
+        );
+
+        seedSub(
+                "पराशर",
+                "Parashar",
+                "Lineage of Maharishi Parashar, father of Ved Vyasa.",
+                vashistha, 9
+        );
+
+        seedSub(
+                "हरितस",
+                "Haritas",
+                "Descendants of Maharishi Harita, linked to ancient Dharmashastras.",
+                kashyap, 10
+        );
+
+        seedSub(
+                "उपमन्यु",
+                "Upamanyu",
+                "Lineage of Maharishi Upamanyu, known for devotion and penance.",
+                gautam, 11
+        );
+
+        seedSub(
+                "कपिंजल",
+                "Kapingal",
+                "Traditional Kapingal gotra referenced in Shrimali lineage.",
+                kashyap, 12
+        );
+
+        seedSub(
+                "चंद्र",
+                "Chandra",
+                "Traditional Chandra gotra associated with discipline and virtue.",
+                atri, 13
+        );
+
+        seedSub(
+                "लौदावन",
+                "Laudavan",
+                "Regional Shrimali gotra associated with Chamunda tradition.",
+                kashyap, 14
+        );
+
+        seedSub(
+                "मौद्गल",
+                "Maudgal",
+                "Lineage of Maharishi Mudgala, referenced in Vedic texts.",
+                bharadwaj, 15
+        );
+
+        seedSub(
+                "शांडिल्य",
+                "Shandilya",
+                "Lineage of Maharishi Shandilya, associated with Smriti traditions.",
+                atri, 16
+        );
     }
 
     /* ============================
        Seeder Helpers
        ============================ */
 
-    private Gotra seedCore(String nameHi, String name, String description) {
+    private Gotra seedCore(String nameHi, String name, String description, int order) {
         Gotra gotra = gotraRepository.findByNameIgnoreCase(name)
                 .orElseGet(Gotra::new);
 
@@ -61,6 +151,14 @@ public class GotraStartupSeeder implements ApplicationRunner {
         gotra.setName(name);
         gotra.setCore(true);
         gotra.setDescription(description);
+
+        // ✅ Set displayOrder only if missing
+        if (gotra.getDisplayOrder() == null) {
+            gotra.setDisplayOrder(order);
+            if (!isNew) {
+                log.info("Updated missing displayOrder for core gotra: {}", name);
+            }
+        }
 
         // ✅ Update only if empty
         if (gotra.getNameHi() == null || gotra.getNameHi().isBlank()) {
@@ -77,7 +175,7 @@ public class GotraStartupSeeder implements ApplicationRunner {
         return gotraRepository.save(gotra);
     }
 
-    private void seedSub(String nameHi, String name, String description, Gotra parentGotra) {
+    private void seedSub(String nameHi, String name, String description, Gotra parentGotra, int order) {
         Gotra gotra = gotraRepository.findByNameIgnoreCase(name)
                 .orElseGet(Gotra::new);
 
@@ -87,6 +185,14 @@ public class GotraStartupSeeder implements ApplicationRunner {
         gotra.setCore(false);
         gotra.setDescription(description);
         gotra.setParentGotra(parentGotra);
+
+        // ✅ Set displayOrder only if missing
+        if (gotra.getDisplayOrder() == null) {
+            gotra.setDisplayOrder(order);
+            if (!isNew) {
+                log.info("Updated missing displayOrder for sub gotra: {}", name);
+            }
+        }
 
         // ✅ Update only if empty
         if (gotra.getNameHi() == null || gotra.getNameHi().isBlank()) {
