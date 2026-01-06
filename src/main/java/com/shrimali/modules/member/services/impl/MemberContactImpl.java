@@ -1,7 +1,6 @@
 package com.shrimali.modules.member.services.impl;
 
 import com.shrimali.exceptions.BadRequestException;
-import com.shrimali.model.auth.User;
 import com.shrimali.model.member.Member;
 import com.shrimali.model.member.MemberContact;
 import com.shrimali.modules.member.dto.ContactPayload;
@@ -9,14 +8,12 @@ import com.shrimali.modules.member.services.MemberContactService;
 import com.shrimali.modules.shared.services.SecurityUtils;
 import com.shrimali.modules.shared.utils.AppConstant;
 import com.shrimali.repositories.MemberContactRepository;
+import com.shrimali.repositories.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
 import java.util.List;
 
 @Service
@@ -25,14 +22,17 @@ public class MemberContactImpl implements MemberContactService {
 
     private final SecurityUtils securityUtils;
 
+    private final MemberRepository memberRepository;
     private final MemberContactRepository memberContactRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public List<ContactPayload> listContacts(Principal principal) {
-        Long memberId = getMemberId(principal);
+    public List<ContactPayload> listContacts(String membershipNumber) {
+        Member member = securityUtils.getCurrentMember();
 
-        return memberContactRepository.findByMember_Id(memberId)
+        Member targetMember = resolveTargetMember(membershipNumber, member);
+
+        return memberContactRepository.findByMember_Id(targetMember.getId())
                 .stream()
                 .map(c -> new ContactPayload(
                         c.getId(),
@@ -45,15 +45,17 @@ public class MemberContactImpl implements MemberContactService {
 
     @Transactional
     @Override
-    public void addContact(Principal principal, ContactPayload payload) {
-        Long memberId = getMemberId(principal);
+    public void addContact(String membershipNumber, ContactPayload payload) {
+        Member member = securityUtils.getCurrentMember();
+
+        Member targetMember = resolveTargetMember(membershipNumber, member);
 
         validateContact(payload);
 
         // Prevent duplicate
         memberContactRepository
                 .findByMember_IdAndTypeAndValue(
-                        memberId, payload.type(), payload.value()
+                        targetMember.getId(), payload.type(), payload.value()
                 )
                 .ifPresent(c -> {
                     throw new BadRequestException("Contact already exists");
@@ -61,11 +63,11 @@ public class MemberContactImpl implements MemberContactService {
 
         // If primary → unset previous primary for this type
         if (Boolean.TRUE.equals(payload.isPrimary())) {
-            memberContactRepository.clearPrimaryByType(memberId, payload.type());
+            memberContactRepository.clearPrimaryByType(targetMember.getId(), payload.type());
         }
 
         MemberContact contact = MemberContact.builder()
-                .member(Member.builder().id(memberId).build())
+                .member(targetMember)
                 .type(payload.type())
                 .value(payload.value())
                 .isPrimary(Boolean.TRUE.equals(payload.isPrimary()))
@@ -75,7 +77,7 @@ public class MemberContactImpl implements MemberContactService {
     }
 
     @Override
-    public void updateContact(Long id, ContactPayload payload) {
+    public void updateContact(String membershipNumber, Long id, ContactPayload payload) {
         validateContact(payload);
 
         MemberContact contact = memberContactRepository.findById(id)
@@ -92,30 +94,26 @@ public class MemberContactImpl implements MemberContactService {
     }
 
     @Override
-    public void removeContact(Principal principal, ContactPayload payload) {
-        Long memberId = getMemberId(principal);
+    @Transactional
+    public void removeContact(String membershipNumber, Long id) {
+        Member member = securityUtils.getCurrentMember();
 
-        MemberContact contact = memberContactRepository
-                .findByMember_IdAndTypeAndValue(
-                        memberId, payload.type(), payload.value()
-                )
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Contact not found")
-                );
+        Member targetMember = resolveTargetMember(membershipNumber, member);
 
-        memberContactRepository.delete(contact);
+        boolean removed = targetMember.getContacts()
+                .removeIf(contact -> contact.getId().equals(id));
+
+        if (!removed) {
+            throw new EntityNotFoundException("Contact not found");
+        }
     }
 
-    private Long getMemberId(Principal principal) {
-        User userPrincipal = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
-        assert userPrincipal != null;
-        Long memberId = userPrincipal.getMemberId();
-
-        if (userPrincipal.getMemberId() == null) {
-            throw new AccessDeniedException("Invalid user principal");
+    private Member resolveTargetMember(String membershipNumber, Member currentUserMember) {
+        if (membershipNumber == null || membershipNumber.equalsIgnoreCase("self")) {
+            return currentUserMember;
         }
-
-        return userPrincipal.getMemberId();
+        return memberRepository.findByMembershipNumber(membershipNumber)
+                .orElseThrow(() -> new BadRequestException("Target member record not found"));
     }
 
     private void validateContact(ContactPayload payload) {

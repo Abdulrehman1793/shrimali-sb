@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/members/contact")
+@RequestMapping("/api/v1/members/{membershipNumber}/contact")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -23,20 +23,20 @@ public class MemberContactController {
 
     /* -------------------- LIST CONTACTS -------------------- */
     @GetMapping
-    public ResponseEntity<List<ContactPayload>> listContacts(Principal principal) {
+    public ResponseEntity<List<ContactPayload>> listContacts(@PathVariable String membershipNumber) {
         log.debug("Fetching member contacts");
-        List<ContactPayload> contacts = memberContactService.listContacts(principal);
+        List<ContactPayload> contacts = memberContactService.listContacts(membershipNumber);
         return ResponseEntity.ok(contacts);
     }
 
     /* -------------------- ADD CONTACT -------------------- */
     @PostMapping
     public ResponseEntity<?> addContact(
-            Principal principal,
+            @PathVariable String membershipNumber,
             @Valid @RequestBody ContactPayload payload
     ) {
         log.debug("Adding contact: {}", payload);
-        memberContactService.addContact(principal, payload);
+        memberContactService.addContact(membershipNumber, payload);
         return ResponseEntity.ok(
                 Map.of("message", "Contact added successfully")
         );
@@ -45,22 +45,22 @@ public class MemberContactController {
     /* -------------------- UPDATE CONTACT -------------------- */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateContact(
+            @PathVariable String membershipNumber,
             @PathVariable Long id,
             @Valid @RequestBody ContactPayload payload
     ) {
         log.debug("Updating contact: {}", payload);
-        memberContactService.updateContact(id, payload);
+        memberContactService.updateContact(membershipNumber, id, payload);
         return ResponseEntity.ok(Map.of("message", "Contact updated successfully"));
     }
 
     /* -------------------- DELETE CONTACT -------------------- */
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> removeContact(
-            Principal principal,
-            @Valid @RequestBody ContactPayload payload
+            @PathVariable String membershipNumber,            @PathVariable Long id
     ) {
-        log.debug("Removing contact: {}", payload);
-        memberContactService.removeContact(principal, payload);
+        log.debug("Removing contact: {}", id);
+        memberContactService.removeContact(membershipNumber, id);
         return ResponseEntity.ok(
                 Map.of("message", "Contact removed successfully")
         );

@@ -7,11 +7,11 @@ import java.security.Principal;
 import java.util.List;
 
 public interface MemberContactService {
-    List<ContactPayload> listContacts(Principal principal);
+    List<ContactPayload> listContacts(String membershipNumber);
 
-    void addContact(Principal principal, ContactPayload contactPayload);
+    void addContact(String membershipNumber, ContactPayload contactPayload);
 
-    void updateContact(Long id, ContactPayload contactPayload);
+    void updateContact(String membershipNumber, Long id, ContactPayload contactPayload);
 
-    void removeContact(Principal principal, ContactPayload contactPayload);
+    void removeContact(String membershipNumber, Long id);
 }
