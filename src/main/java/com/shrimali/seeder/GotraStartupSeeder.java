@@ -32,7 +32,7 @@ public class GotraStartupSeeder implements ApplicationRunner {
         Gotra atri = seedCore("अत्रि", "Atri", "Descendants of Maharishi Atri, one of the Saptarishis.");
         Gotra jamadagni = seedCore("जमदग्नि", "Jamadagni", "Lineage of Maharishi Jamadagni, father of Parashurama.");
         Gotra kaushik = seedCore("कौशिक", "Kaushik", "Descendants of Maharishi Vishwamitra (Kaushika lineage).");
-
+        Gotra others = seedCore("अन्य", "Others", "Community members belonging to other recognized gotras or lineages.");
 // ============================
 // Extended / Sub-Gotras
 // ============================
