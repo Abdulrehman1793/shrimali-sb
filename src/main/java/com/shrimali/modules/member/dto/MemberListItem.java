@@ -28,5 +28,7 @@ public class MemberListItem {
     private String phone;
     private String email;
 
+    private String relationShipName;
+
     private List<String> gotras;
 }

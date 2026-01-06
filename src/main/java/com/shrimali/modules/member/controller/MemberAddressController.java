@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/members/addresses")
+@RequestMapping("/api/v1/members/{membershipNumber}/addresses")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
@@ -24,21 +24,19 @@ public class MemberAddressController {
 
     /* -------------------- LIST ADDRESSES -------------------- */
     @GetMapping
-    public ResponseEntity<List<MemberAddressPayload>> listAddresses() {
+    public ResponseEntity<List<MemberAddressPayload>> listAddresses(@PathVariable String membershipNumber) {
         log.debug("Fetching member addresses");
-        return ResponseEntity.ok(
-                memberAddressService.list()
-        );
+        return ResponseEntity.ok(memberAddressService.list(membershipNumber));
     }
 
     /* -------------------- ADD ADDRESS -------------------- */
     @PostMapping
     public ResponseEntity<?> addAddress(
-            Principal principal,
+            @PathVariable String membershipNumber,
             @Valid @RequestBody MemberAddressPayload payload
     ) {
         log.debug("Adding address: {}", payload);
-        memberAddressService.add(principal, payload);
+        memberAddressService.add(membershipNumber, payload);
         return ResponseEntity.ok(
                 Map.of("message", "Address added successfully")
         );
@@ -47,11 +45,10 @@ public class MemberAddressController {
     /* -------------------- UPDATE ADDRESS -------------------- */
     @PutMapping
     public ResponseEntity<?> updateAddress(
-            Principal principal,
-            @Valid @RequestBody MemberAddressPayload payload
+            @PathVariable String membershipNumber, @Valid @RequestBody MemberAddressPayload payload
     ) {
         log.debug("Updating address: {}", payload);
-        memberAddressService.update(principal, payload);
+        memberAddressService.update(membershipNumber, payload);
         return ResponseEntity.ok(
                 Map.of("message", "Address updated successfully")
         );
@@ -60,11 +57,11 @@ public class MemberAddressController {
     /* -------------------- DELETE ADDRESS -------------------- */
     @DeleteMapping("/{addressType}")
     public ResponseEntity<?> deleteAddress(
-            Principal principal,
+            @PathVariable String membershipNumber,
             @PathVariable String addressType
     ) {
         log.debug("Deleting address of type: {}", addressType);
-        memberAddressService.remove(addressType);
+        memberAddressService.remove(membershipNumber, addressType);
         return ResponseEntity.ok(
                 Map.of("message", "Address deleted successfully")
         );

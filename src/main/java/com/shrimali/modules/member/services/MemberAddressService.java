@@ -6,11 +6,11 @@ import java.security.Principal;
 import java.util.List;
 
 public interface MemberAddressService {
-    List<MemberAddressPayload> list();
+    List<MemberAddressPayload> list(String membershipNumber);
 
-    void add(Principal principal, MemberAddressPayload payload);
+    void add(String membershipNumber, MemberAddressPayload payload);
 
-    void update(Principal principal, MemberAddressPayload payload);
+    void update(String membershipNumber, MemberAddressPayload payload);
 
-    void remove(String type);
+    void remove(String membershipNumber, String type);
 }

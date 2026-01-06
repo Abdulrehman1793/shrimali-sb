@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -182,19 +183,39 @@ public class MemberSearchServiceImpl implements MemberSearchService {
     @Override
     @Transactional()
     public PagedResponse<MemberListItem> getManagedMembers(int page, int size) {
-        Member currentUser = securityUtils.getCurrentMember();
+        Member currentMember = securityUtils.getCurrentMember();
 
         // 2. Setup pagination
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // 3. Query the repository for owned profiles
         // This assumes your repository has findByOwnerId
-        Page<Member> managedMembers = memberRepository.findByOwnerId(currentUser.getId(), pageable);
+        Page<Member> managedMembers = memberRepository.findByOwnerId(currentMember.getId(), pageable);
+
+        List<MemberListItem> memberListItems = managedMembers
+                .toList().stream()
+                .map(m -> {
+                    String relationShipName = "";
+                    if (Objects.equals(m.getId(), currentMember.getId()))
+                        relationShipName = "Self";
+
+                    if (currentMember.getFather() != null && currentMember.getFather().getId().equals(m.getId()))
+                        relationShipName = "Father";
+
+                    if (currentMember.getMother() != null && currentMember.getMother().getId().equals(m.getId()))
+                        relationShipName = "Mother";
+
+                    if (currentMember.getSpouse() != null && currentMember.getSpouse().getId().equals(m.getId()))
+                        relationShipName = "Spouse";
+
+                    MemberListItem listItem = memberMapper.toListItem(m);
+                    listItem.setRelationShipName(relationShipName);
+                    return listItem;
+                }).toList();
 
         // 4. Map entities to List DTOs
         return new PagedResponse<>(
-                managedMembers.toList()
-                        .stream().map(memberMapper::toListItem).toList(),
+                memberListItems,
                 PageRequest.of(
                         managedMembers.getPageable().getPageNumber(),
                         managedMembers.getPageable().getPageSize(),
