@@ -1,5 +1,6 @@
 package com.shrimali.modules.shared.services.impl;
 
+import com.shrimali.dto.AuthenticatedIdentity;
 import com.shrimali.exceptions.BadRequestException;
 import com.shrimali.model.member.Member;
 import com.shrimali.modules.shared.dto.PresignedUrlResponse;
@@ -87,8 +88,13 @@ public class ImageUploadServiceImpl implements ImageUploadService {
 
     @Override
     public PresignedUrlResponse getPresignedUploadUrl(String membershipNumber, String fileName, String contentType, boolean isThumbnail) {
-        Member member = memberRepository.findByMembershipNumber(membershipNumber)
-                .orElseThrow(() -> new BadRequestException("Member not found"));
+        AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
+        Member member = currentIdentity.member();
+
+        if (membershipNumber != null && !membershipNumber.equalsIgnoreCase("self")) {
+            member = memberRepository.findByMembershipNumber(membershipNumber)
+                    .orElseThrow(() -> new BadRequestException("Member record not found"));
+        }
 
         String folder = isThumbnail ? "thumbnails" : "originals";
 
@@ -129,8 +135,13 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     @Override
     @Transactional
     public String updateMemberPhoto(String membershipNumber, String s3Key, String thumbnailUrl) {
-        Member member = memberRepository.findByMembershipNumber(membershipNumber)
-                .orElseThrow(() -> new BadRequestException("Member not found"));
+        AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
+        Member member = currentIdentity.member();
+
+        if (membershipNumber != null && !membershipNumber.equalsIgnoreCase("self")) {
+            member = memberRepository.findByMembershipNumber(membershipNumber)
+                    .orElseThrow(() -> new BadRequestException("Member record not found"));
+        }
 
         // Update the field in your DB entity
         member.setPhotoUrl(s3Key);
