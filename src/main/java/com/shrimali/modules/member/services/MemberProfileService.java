@@ -27,11 +27,11 @@ public interface MemberProfileService {
     /**
      * Specialized updates for family tree links.
      */
-    void updateFatherDetails(MemberPayload dto);
+    void updateFatherDetails(String membershipNumber, MemberPayload dto);
 
-    void updateMotherDetails(MemberPayload dto);
+    void updateMotherDetails(String membershipNumber, MemberPayload dto);
 
-    void updateSpouseDetails(MemberPayload dto);
+    void updateSpouseDetails(String membershipNumber, MemberPayload dto);
 
     /**
      * Adds or updates contact information (Phone, Email, Social).

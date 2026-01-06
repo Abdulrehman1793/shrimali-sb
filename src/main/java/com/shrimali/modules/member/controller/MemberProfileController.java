@@ -56,9 +56,9 @@ public class MemberProfileController {
      * Links an existing member or creates a new 'Ghost' father profile.
      * The current member becomes the 'Owner' of the newly created profile.
      */
-    @PutMapping("/father")
-    public ResponseEntity<Void> updateFatherDetails(@Valid @RequestBody MemberPayload dto) {
-        memberProfileService.updateFatherDetails(dto);
+    @PutMapping("/{membershipNumber}/father")
+    public ResponseEntity<Void> updateFatherDetails(@PathVariable String membershipNumber, @Valid @RequestBody MemberPayload dto) {
+        memberProfileService.updateFatherDetails(membershipNumber, dto);
         return ResponseEntity.noContent().build();
     }
 
@@ -66,9 +66,9 @@ public class MemberProfileController {
      * Links an existing member or creates a new 'Ghost' mother profile.
      * The current member becomes the 'Owner' of the newly created profile.
      */
-    @PutMapping("/mother")
-    public ResponseEntity<Void> updateMotherDetails(@Valid @RequestBody MemberPayload dto) {
-        memberProfileService.updateMotherDetails(dto);
+    @PutMapping("/{membershipNumber}/mother")
+    public ResponseEntity<Void> updateMotherDetails(@PathVariable String membershipNumber, @Valid @RequestBody MemberPayload dto) {
+        memberProfileService.updateMotherDetails(membershipNumber, dto);
         return ResponseEntity.noContent().build();
     }
 
@@ -76,9 +76,9 @@ public class MemberProfileController {
      * Links an existing member or creates a new 'Ghost' spouse profile.
      * The current member becomes the 'Owner' of the newly created profile.
      */
-    @PutMapping("/spouse")
-    public ResponseEntity<Void> updateSpouseDetails(@Valid @RequestBody MemberPayload dto) {
-        memberProfileService.updateSpouseDetails(dto);
+    @PutMapping("/{membershipNumber}/spouse")
+    public ResponseEntity<Void> updateSpouseDetails(@PathVariable String membershipNumber, @Valid @RequestBody MemberPayload dto) {
+        memberProfileService.updateSpouseDetails(membershipNumber, dto);
         return ResponseEntity.noContent().build();
     }
 }

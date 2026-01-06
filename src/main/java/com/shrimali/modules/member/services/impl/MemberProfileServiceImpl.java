@@ -154,107 +154,185 @@ public class MemberProfileServiceImpl implements MemberProfileService {
 
     @Override
     @Transactional
-    public void updateFatherDetails(MemberPayload dto) {
+    public void updateFatherDetails(String membershipNumber, MemberPayload dto) {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
-        Member member = currentIdentity.member();
+        Member currentUserMember = currentIdentity.member();
 
-        Member savedMember;
-        if (dto.memberId() != null) {
-            savedMember = memberRepository
-                    .findById(dto.memberId()).orElseThrow(() -> new BadRequestException("Member not found"));
-        } else {
-            savedMember = memberRepository.save(
-                    Member.builder()
-                            .firstName(dto.firstName())
-                            .middleName(dto.middleName())
-                            .lastName(dto.lastName())
-                            .dob(LocalDate.parse(dto.dob()))
-                            .owner(currentIdentity.user())
-                            .gender(Gender.Male)
-                            .maritalStatus(MaritalStatus.MARRIED)
-                            .membershipStatus(MembershipStatus.ACTIVE)
-                            .paternalVillage(dto.paternalVillage())
-                            .naniyalVillage(dto.naniyalVillage())
-                            .paternalGotra(member.getPaternalGotra())
-                            .deceased(dto.deceased() != null ? dto.deceased() : false)
-                            .build());
+        // 1. Identify which member we are updating (Self or Managed Member)
+        Member targetMember = resolveTargetMember(membershipNumber, currentUserMember);
+
+        // 2. Resolve or Create the Father entity
+        Member fatherEntity = resolveOrCreateFather(dto, currentIdentity);
+
+        // 3. Prevent Circular Reference (A member cannot be their own father)
+        if (fatherEntity.getId() != null && fatherEntity.getId().equals(targetMember.getId())) {
+            throw new BadRequestException("A member cannot be assigned as their own father.");
         }
 
-        member.setFather(savedMember);
-        memberRepository.save(member);
+        if (fatherEntity.getId() == null) {
+            fatherEntity = memberRepository.save(fatherEntity);
+        }
+
+        // 4. Establish the relationship and save
+        targetMember.setFather(fatherEntity);
+        memberRepository.save(targetMember);
     }
 
     @Override
     @Transactional
-    public void updateMotherDetails(MemberPayload dto) {
+    public void updateMotherDetails(String membershipNumber, MemberPayload dto) {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
-        Member member = currentIdentity.member();
+        Member currentUserMember = currentIdentity.member();
 
-        Member savedMember;
-        if (dto.memberId() != null) {
-            savedMember = memberRepository
-                    .findById(dto.memberId()).orElseThrow(() -> new BadRequestException("Member not found"));
-        } else {
-            savedMember = memberRepository.save(
-                    Member.builder()
-                            .firstName(dto.firstName())
-                            .middleName(dto.middleName())
-                            .lastName(dto.lastName())
-                            .dob(LocalDate.parse(dto.dob()))
-                            .owner(currentIdentity.user())
-                            .gender(Gender.Female)
-                            .maritalStatus(MaritalStatus.MARRIED)
-                            .membershipStatus(MembershipStatus.ACTIVE)
-                            .paternalVillage(dto.paternalVillage())
-                            .naniyalVillage(dto.naniyalVillage())
-                            .paternalGotra(member.getPaternalGotra())
-                            .deceased(dto.deceased() != null ? dto.deceased() : false)
-                            .build());
+        // 1. Resolve which member is being updated (Self or Managed Member)
+        Member targetMember = resolveTargetMember(membershipNumber, currentUserMember);
+
+        // 2. Resolve or Create the Mother entity
+        Member motherEntity = resolveOrCreateMother(dto, currentIdentity);
+
+        // 3. Fix the Transient Error: Save motherEntity if it's new
+        if (motherEntity.getId() == null) {
+            motherEntity = memberRepository.save(motherEntity);
         }
 
-        member.setMother(savedMember);
-        memberRepository.save(member);
+        // 4. Prevent Circular Reference
+        if (motherEntity.getId() != null && motherEntity.getId().equals(targetMember.getId())) {
+            throw new BadRequestException("A member cannot be assigned as their own mother.");
+        }
+
+        // 5. Establish relationship and save the target member
+        targetMember.setMother(motherEntity);
+        memberRepository.save(targetMember);
     }
 
     @Override
     @Transactional
-    public void updateSpouseDetails(MemberPayload dto) {
+    public void updateSpouseDetails(String membershipNumber, MemberPayload dto) {
         AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
-        Member member = currentIdentity.member();
+        Member currentUserMember = currentIdentity.member();
 
-        Member savedMember;
-        if (dto.memberId() != null) {
-            savedMember = memberRepository
-                    .findById(dto.memberId()).orElseThrow(() -> new BadRequestException("Member not found"));
-        } else {
-            Member newMember = Member.builder()
-                    .firstName(dto.firstName())
-                    .middleName(dto.middleName())
-                    .lastName(dto.lastName())
-                    .dob(LocalDate.parse(dto.dob()))
-                    .owner(currentIdentity.user())
-                    .maritalStatus(MaritalStatus.MARRIED)
-                    .membershipStatus(MembershipStatus.ACTIVE)
-                    .paternalVillage(dto.paternalVillage())
-                    .naniyalVillage(dto.naniyalVillage())
-                    .paternalGotra(member.getPaternalGotra())
-                    .deceased(dto.deceased() != null ? dto.deceased() : false)
-                    .build();
+        // 1. Resolve which member is being updated (Self or Managed Member)
+        Member targetMember = resolveTargetMember(membershipNumber, currentUserMember);
 
-            if (member.getGender() == Gender.Female)
-                newMember.setGender(Gender.Male);
-            else
-                newMember.setGender(Gender.Female);
+        // 2. Resolve or Create the Spouse entity
+        Member spouseEntity = resolveOrCreateSpouse(dto, targetMember, currentIdentity);
 
-            savedMember = memberRepository.save(newMember);
+        // 3. Fix Transient Error: Save spouseEntity if it's new
+        if (spouseEntity.getId() == null) {
+            spouseEntity = memberRepository.save(spouseEntity);
         }
 
-        member.setSpouse(savedMember);
-        memberRepository.save(member);
+        // 4. Prevent Circular Reference (Cannot marry yourself)
+        if (spouseEntity.getId() != null && spouseEntity.getId().equals(targetMember.getId())) {
+            throw new BadRequestException("A member cannot be assigned as their own spouse.");
+        }
+
+        // 5. Establish Bidirectional Relationship
+        targetMember.setSpouse(spouseEntity);
+        targetMember.setMaritalStatus(MaritalStatus.MARRIED);
+
+        // Ensure the spouse also points back to the target member
+        spouseEntity.setSpouse(targetMember);
+        spouseEntity.setMaritalStatus(MaritalStatus.MARRIED);
+
+        // 6. Save both sides of the relationship
+        memberRepository.save(spouseEntity);
+        memberRepository.save(targetMember);
     }
 
     @Override
     public void addOrUpdateContact(ContactPayload payload) {
 
+    }
+
+    private Member resolveTargetMember(String membershipNumber, Member currentUserMember) {
+        if (membershipNumber == null || membershipNumber.equalsIgnoreCase("self")) {
+            return currentUserMember;
+        }
+        return memberRepository.findByMembershipNumber(membershipNumber)
+                .orElseThrow(() -> new BadRequestException("Target member record not found"));
+    }
+
+    private Member resolveOrCreateFather(MemberPayload dto, AuthenticatedIdentity identity) {
+        if (dto.memberId() != null) {
+            return memberRepository.findById(dto.memberId())
+                    .orElseThrow(() -> new BadRequestException("Specified father record not found"));
+        }
+
+        // Create a new Father record if not linked to an existing member
+        return Member.builder()
+                .firstName(dto.firstName())
+                .middleName(dto.middleName())
+                .lastName(dto.lastName())
+                .dob(dto.dob() != null ? LocalDate.parse(dto.dob()) : null)
+                .owner(identity.user())
+                .gender(Gender.Male)
+                .maritalStatus(MaritalStatus.MARRIED)
+                .membershipStatus(MembershipStatus.ACTIVE)
+                .paternalVillage(dto.paternalVillage())
+                .naniyalVillage(dto.naniyalVillage())
+                // Note: Father's paternal gotra is the same as the son's
+                .paternalGotra(identity.member().getPaternalGotra())
+                .deceased(Boolean.TRUE.equals(dto.deceased()))
+                .build();
+    }
+
+    private Member resolveOrCreateMother(MemberPayload dto, AuthenticatedIdentity identity) {
+        if (dto.memberId() != null) {
+            return memberRepository.findById(dto.memberId())
+                    .orElseThrow(() -> new BadRequestException("Specified mother record not found"));
+        }
+
+        // Create a new Mother record
+        return Member.builder()
+                .firstName(dto.firstName())
+                .middleName(dto.middleName())
+                .lastName(dto.lastName())
+                .dob(dto.dob() != null ? LocalDate.parse(dto.dob()) : null)
+                .owner(identity.user())
+                .gender(Gender.Female)
+                .maritalStatus(MaritalStatus.MARRIED)
+                .membershipStatus(MembershipStatus.ACTIVE)
+                .paternalVillage(dto.paternalVillage())
+                .naniyalVillage(dto.naniyalVillage())
+                // Cultural logic: Mother's paternal gotra comes from the DTO/Form,
+                // not the son's paternal gotra.
+                .paternalGotra(getGotra(dto.gotra()))
+                .deceased(Boolean.TRUE.equals(dto.deceased()))
+                .build();
+    }
+
+    private Member resolveOrCreateSpouse(MemberPayload dto, Member targetMember, AuthenticatedIdentity identity) {
+        if (dto.memberId() != null) {
+            return memberRepository.findById(dto.memberId())
+                    .orElseThrow(() -> new BadRequestException("Specified spouse record not found"));
+        }
+
+        // Determine Gender automatically based on the target member
+        Gender spouseGender = (targetMember.getGender() == Gender.Female) ? Gender.Male : Gender.Female;
+
+        return Member.builder()
+                .firstName(dto.firstName())
+                .middleName(dto.middleName())
+                .lastName(dto.lastName())
+                .dob(dto.dob() != null ? LocalDate.parse(dto.dob()) : null)
+                .owner(identity.user())
+                .gender(spouseGender)
+                .maritalStatus(MaritalStatus.MARRIED)
+                .membershipStatus(MembershipStatus.ACTIVE)
+                .paternalVillage(dto.paternalVillage())
+                .naniyalVillage(dto.naniyalVillage())
+                // Cultural Logic: Paternal Gotra of spouse should come from the Form (paternalGotra)
+                .paternalGotra(getGotra(dto.gotra()))
+                .deceased(Boolean.TRUE.equals(dto.deceased()))
+                .build();
+    }
+
+    private Gotra getGotra(Long gotraId) {
+        if (gotraId == null) {
+            return null;
+        }
+        return gotraRepository.findById(gotraId)
+                .orElseThrow(() -> new BadRequestException("Gotra record not found"));
     }
 }
