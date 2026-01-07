@@ -114,11 +114,12 @@ app:
   admins:
     - pradipnsharma@gmail.com
     - abdul.khan@actionabl.ai
+    - mahendra.bohra1974@gmail.com
+    - narendrarajbohra@gmail.com
   super-admins:
     - shrimali.shvbadi@gmail.com
     - abdulrehman1793@gmail.com
 
 aws:
   s3:
-    bucket:
-      shrimali-profile-images
+    bucket: shrimali-profile-images
