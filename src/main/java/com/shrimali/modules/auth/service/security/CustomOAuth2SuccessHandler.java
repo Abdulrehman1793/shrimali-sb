@@ -23,7 +23,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     private final Environment environment;
 
     private String getClientRedirectUrl() {
-        return environment.getProperty("app.client.url", "https://shrimalis.com");
+        return environment.getProperty("app.client.url", "https://www.shrimalis.com");
     }
 
     private String getCookieDomain() {
