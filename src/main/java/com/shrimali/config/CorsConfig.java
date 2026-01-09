@@ -29,7 +29,7 @@ public class CorsConfig {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(
                 List.of("http://65.2.124.16", "http://localhost:5173",
-                        "https://shrimalis.com", "https://dyivpjehgjmg8.cloudfront.net")
+                        "https://shrimalis.com", "https://www.shrimalis.com", "https://dyivpjehgjmg8.cloudfront.net")
         ); // <-- your frontend
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
