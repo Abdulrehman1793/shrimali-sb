@@ -54,8 +54,8 @@ spring:
               - openid
               - profile
               - email
-#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            redirect-uri: "https://www.shrimalis.com/login/oauth2/code/google"
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+#            redirect-uri: "https://www.shrimalis.com/login/oauth2/code/google"
 #            redirect-uri: "https://dyivpjehgjmg8.cloudfront.net/login/oauth2/code/google"
         provider:
           google:
