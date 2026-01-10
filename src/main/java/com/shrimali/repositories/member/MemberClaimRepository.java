@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface MemberClaimRepository extends JpaRepository<MemberClaim, Integer> {
+public interface MemberClaimRepository extends JpaRepository<MemberClaim, Long> {
     boolean existsByTargetMemberAndStatus(Member targetMember, ClaimStatus status);
 
     boolean existsByRequesterAndStatus(User requester, ClaimStatus status);

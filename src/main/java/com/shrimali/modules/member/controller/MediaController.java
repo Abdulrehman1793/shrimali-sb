@@ -1,5 +1,6 @@
 package com.shrimali.modules.member.controller;
 
+import com.shrimali.model.enums.MediaOwnerType;
 import com.shrimali.modules.member.dto.ProfilePhotoResponse;
 import com.shrimali.modules.member.dto.UpdatePhotoRequest;
 import com.shrimali.modules.shared.dto.PresignedUrlResponse;
@@ -19,22 +20,28 @@ import org.springframework.web.bind.annotation.*;
  * for storage-specific logic.
  */
 @RestController
-@RequestMapping("/api/v1/members/media")
+@RequestMapping("/api/v1/media")
 @RequiredArgsConstructor
 @Validated
-public class MemberMediaController {
+public class MediaController {
     private final ImageUploadService imageUploadService;
 
-    @GetMapping("/{membershipNumber}/photo-upload-url")
-    public ResponseEntity<PresignedUrlResponse> getUploadUrl(@PathVariable String membershipNumber, @RequestParam("fileName") String fileName, @RequestParam("contentType") String contentType, @RequestParam(value = "isThumbnail", defaultValue = "false") boolean isThumbnail) {
+    @GetMapping("/{ownerType}/{ownerId}/photo-upload-url")
+    public ResponseEntity<PresignedUrlResponse> getUploadUrl(
+            @PathVariable MediaOwnerType ownerType,
+            @PathVariable String ownerId,
+            @RequestParam("fileName") String fileName,
+            @RequestParam("contentType") String contentType,
+            @RequestParam(value = "isThumbnail", defaultValue = "false") boolean isThumbnail) {
         // Now passes the isThumbnail flag to the service logic
-        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(membershipNumber, fileName, contentType, isThumbnail);
+        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(ownerType, ownerId, fileName, contentType, isThumbnail);
         return ResponseEntity.ok(presignedUrl);
     }
 
-    @PatchMapping("/{membershipNumber}/update-photo-path")
-    public ResponseEntity<ProfilePhotoResponse> updatePhotoPath(@PathVariable String membershipNumber, @RequestBody UpdatePhotoRequest request) {
-        String photoUrl = imageUploadService.updateMemberPhoto(membershipNumber, request.getPhotoUrl(), request.getThumbnailUrl());
+    @PatchMapping("/{ownerType}/{ownerId}/update-photo-path")
+    public ResponseEntity<ProfilePhotoResponse> updatePhotoPath(
+            @PathVariable MediaOwnerType ownerType, @PathVariable String ownerId, @RequestBody UpdatePhotoRequest request) {
+        String photoUrl = imageUploadService.updateMemberPhoto(ownerType, ownerId, request.getPhotoUrl(), request.getThumbnailUrl());
 
         return ResponseEntity.ok(new ProfilePhotoResponse(photoUrl));
     }

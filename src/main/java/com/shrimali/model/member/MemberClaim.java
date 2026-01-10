@@ -35,6 +35,21 @@ public class MemberClaim {
     @Enumerated(EnumType.STRING)
     private ClaimStatus status = ClaimStatus.PENDING; // "PENDING", "APPROVED", "REJECTED"
 
+    @Column(name = "requester_full_name", length = 200)
+    private String requesterFullName;
+
+    @Column(name = "requester_photo_url")
+    private String requesterPhotoUrl;
+
+    @Column(name = "requester_thumbnail_url")
+    private String requesterThumbnailUrl;
+
+    @Column(name = "requester_relation", length = 50)
+    private String requesterRelation; // optional if not already stored
+
+    @Column(name = "identity_note", length = 500)
+    private String identityNote; // optional explanation
+
     // Token Logic for Authentication
     private String verificationTokenHash;
     private LocalDateTime tokenExpiry;

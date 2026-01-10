@@ -2,11 +2,14 @@ package com.shrimali.modules.shared.services.impl;
 
 import com.shrimali.dto.AuthenticatedIdentity;
 import com.shrimali.exceptions.BadRequestException;
+import com.shrimali.model.enums.MediaOwnerType;
 import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberClaim;
 import com.shrimali.modules.shared.dto.PresignedUrlResponse;
 import com.shrimali.modules.shared.services.ImageUploadService;
 import com.shrimali.modules.shared.services.SecurityUtils;
 import com.shrimali.repositories.MemberRepository;
+import com.shrimali.repositories.member.MemberClaimRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
@@ -32,6 +35,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     private final S3Presigner s3Presigner;
 
     private final MemberRepository memberRepository;
+    private final MemberClaimRepository memberClaimRepository;
 
     private final SecurityUtils securityUtils;
 
@@ -86,67 +90,72 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
+
     @Override
-    public PresignedUrlResponse getPresignedUploadUrl(String membershipNumber, String fileName, String contentType, boolean isThumbnail) {
-        AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
-        Member member = currentIdentity.member();
+    public PresignedUrlResponse getPresignedUploadUrl(
+            MediaOwnerType ownerType, String ownerId, String fileName, String contentType, boolean isThumbnail) {
+        validateContentType(contentType);
 
-        if (membershipNumber != null && !membershipNumber.equalsIgnoreCase("self")) {
-            member = memberRepository.findByMembershipNumber(membershipNumber)
-                    .orElseThrow(() -> new BadRequestException("Member record not found"));
-        }
+        // 🔐 Authorization
+        validateOwnership(ownerType, ownerId);
 
-        String folder = isThumbnail ? "thumbnails" : "originals";
-
-        // Extract extension
-        String extension = "";
-        int i = fileName.lastIndexOf('.');
-        if (i > 0) {
-            extension = fileName.substring(i);
-        } else if (isThumbnail) {
-            extension = ".jpg";
-        }
-
+        String extension = extractExtension(fileName, isThumbnail);
         long timestamp = System.currentTimeMillis();
 
-        // Construct Key: profiles/thumbnails/MEM123_1703954000.jpg
-        String objectKey = String.format("profiles/%s/%s_%d%s",
-                folder,
-                member.getMembershipNumber(),
+        String objectKey = buildObjectKey(
+                ownerType,
+                ownerId,
+                isThumbnail,
                 timestamp,
-                extension);
+                extension
+        );
 
-        PutObjectRequest objectRequest = PutObjectRequest.builder()
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(objectKey)
                 .contentType(contentType)
                 .build();
 
-        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(5))
-                .putObjectRequest(objectRequest)
-                .build();
+        PutObjectPresignRequest presignRequest =
+                PutObjectPresignRequest.builder()
+                        .signatureDuration(Duration.ofMinutes(5))
+                        .putObjectRequest(putObjectRequest)
+                        .build();
 
-        String url = s3Presigner.presignPutObject(presignRequest).url().toString();
+        String uploadUrl =
+                s3Presigner.presignPutObject(presignRequest)
+                        .url()
+                        .toString();
 
-        return new PresignedUrlResponse(url, objectKey);
+        return new PresignedUrlResponse(uploadUrl, objectKey);
     }
 
     @Override
     @Transactional
-    public String updateMemberPhoto(String membershipNumber, String s3Key, String thumbnailUrl) {
-        AuthenticatedIdentity currentIdentity = securityUtils.getCurrentIdentity();
-        Member member = currentIdentity.member();
+    public String updateMemberPhoto(
+            MediaOwnerType ownerType, String ownerId, String s3Key, String thumbnailUrl) {
+        validateOwnership(ownerType, ownerId);
 
-        if (membershipNumber != null && !membershipNumber.equalsIgnoreCase("self")) {
-            member = memberRepository.findByMembershipNumber(membershipNumber)
-                    .orElseThrow(() -> new BadRequestException("Member record not found"));
+        switch (ownerType) {
+            case MEMBER -> {
+                Member member = memberRepository
+                        .findByMembershipNumber(ownerId)
+                        .orElseThrow(() ->
+                                new BadRequestException("Member not found"));
+
+                member.setPhotoUrl(s3Key);
+                member.setThumbnailUrl(thumbnailUrl);
+                memberRepository.save(member);
+            }
+
+            case CLAIM -> {
+                MemberClaim memberClaim = memberClaimRepository.findById(Long.parseLong(ownerId))
+                        .orElseThrow(() -> new BadRequestException("Member not found"));
+                memberClaim.setRequesterPhotoUrl(s3Key);
+                memberClaim.setRequesterThumbnailUrl(thumbnailUrl);
+                memberClaimRepository.save(memberClaim);
+            }
         }
-
-        // Update the field in your DB entity
-        member.setPhotoUrl(s3Key);
-        member.setThumbnailUrl(thumbnailUrl);
-        memberRepository.save(member);
 
         return s3Key;
     }
@@ -164,6 +173,47 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         // Max 5MB
         if (file.getSize() > 5 * 1024 * 1024) {
             throw new IllegalArgumentException("Image size exceeds 5MB");
+        }
+    }
+
+    private void validateOwnership(
+            MediaOwnerType ownerType, String ownerId) {
+        if (ownerType == MediaOwnerType.MEMBER) {
+            AuthenticatedIdentity identity = securityUtils.getCurrentIdentity();
+            if (!identity.member().getMembershipNumber().equals(ownerId)) {
+                throw new BadRequestException("Unauthorized photo update");
+            }
+        }
+        // CLAIM validation can be added here
+    }
+
+    private String buildObjectKey(
+            MediaOwnerType ownerType,
+            String ownerId,
+            boolean isThumbnail,
+            long timestamp,
+            String extension
+    ) {
+        String base = switch (ownerType) {
+            case MEMBER -> "media/members/" + ownerId;
+            case CLAIM -> "media/claims/" + ownerId;
+        };
+
+        String folder = isThumbnail ? "thumbnails" : "originals";
+        return String.format("%s/%s/%d%s", base, folder, timestamp, extension);
+    }
+
+    private String extractExtension(String fileName, boolean isThumbnail) {
+        int i = fileName.lastIndexOf('.');
+        if (i > 0) {
+            return fileName.substring(i);
+        }
+        return isThumbnail ? ".jpg" : "";
+    }
+
+    private void validateContentType(String contentType) {
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BadRequestException("Only image uploads allowed");
         }
     }
 }

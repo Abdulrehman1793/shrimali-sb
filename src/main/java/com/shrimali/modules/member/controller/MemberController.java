@@ -168,23 +168,23 @@ public class MemberController {
         );
     }
 
-    @GetMapping("/photo-upload-url")
-    public ResponseEntity<PresignedUrlResponse> getUploadUrl(
-            @RequestParam("fileName") String fileName,
-            @RequestParam("contentType") String contentType,
-            @RequestParam(value = "isThumbnail", defaultValue = "false") boolean isThumbnail
-    ) {
-        // Now passes the isThumbnail flag to the service logic
-        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(null, fileName, contentType, isThumbnail);
-        return ResponseEntity.ok(presignedUrl);
-    }
-
-    @PatchMapping("/update-photo-path")
-    public ResponseEntity<ProfilePhotoResponse> updatePhotoPath(@RequestBody UpdatePhotoRequest request) {
-        String photoUrl = imageUploadService.updateMemberPhoto(null, request.getPhotoUrl(), request.getThumbnailUrl());
-
-        return ResponseEntity.ok(new ProfilePhotoResponse(photoUrl));
-    }
+//    @GetMapping("/photo-upload-url")
+//    public ResponseEntity<PresignedUrlResponse> getUploadUrl(
+//            @RequestParam("fileName") String fileName,
+//            @RequestParam("contentType") String contentType,
+//            @RequestParam(value = "isThumbnail", defaultValue = "false") boolean isThumbnail
+//    ) {
+//        // Now passes the isThumbnail flag to the service logic
+//        PresignedUrlResponse presignedUrl = imageUploadService.getPresignedUploadUrl(null, fileName, contentType, isThumbnail);
+//        return ResponseEntity.ok(presignedUrl);
+//    }
+//
+//    @PatchMapping("/update-photo-path")
+//    public ResponseEntity<ProfilePhotoResponse> updatePhotoPath(@RequestBody UpdatePhotoRequest request) {
+//        String photoUrl = imageUploadService.updateMemberPhoto(null, request.getPhotoUrl(), request.getThumbnailUrl());
+//
+//        return ResponseEntity.ok(new ProfilePhotoResponse(photoUrl));
+//    }
 
     @GetMapping("/my-profile")
     public ResponseEntity<MemberProfileResponse> getMyProfile(Principal principal) {
