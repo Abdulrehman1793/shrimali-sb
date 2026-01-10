@@ -5,11 +5,9 @@ import com.shrimali.exceptions.ConflictException;
 import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.Role;
 import com.shrimali.model.auth.User;
-import com.shrimali.model.enums.MembershipStatus;
-import com.shrimali.model.enums.ProfileStatus;
-import com.shrimali.model.enums.RoleName;
-import com.shrimali.model.enums.UserStatus;
+import com.shrimali.model.enums.*;
 import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberClaim;
 import com.shrimali.modules.member.dto.MemberDiscoveryDto;
 import com.shrimali.modules.member.dto.MemberMatchResponse;
 import com.shrimali.modules.member.services.MemberDiscoveryService;
@@ -18,6 +16,7 @@ import com.shrimali.modules.shared.services.SecurityUtils;
 import com.shrimali.repositories.GotraRepository;
 import com.shrimali.repositories.MemberRepository;
 import com.shrimali.repositories.UserRepository;
+import com.shrimali.repositories.member.MemberClaimRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +34,7 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
     private final GotraRepository gotraRepository;
+    private final MemberClaimRepository memberClaimRepository;
 
     private final AuditService auditService;
     private final SecurityUtils securityUtils;
@@ -126,28 +126,44 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadRequestException("Profile not found"));
 
-        // Security Check: Ensure profile isn't already claimed by someone else
+        // Already claimed
         if (existingMember.getLinkedUser() != null) {
             throw new BadRequestException("This profile has already been claimed.");
         }
 
+        // Deceased cannot be claimed
         if (existingMember.isDeceased()) {
-            // "Claimed decease" sounds a bit awkward; "claimed for a deceased member" is clearer.
             throw new BadRequestException("A profile marked as deceased cannot be claimed.");
         }
 
+        // Prevent duplicate pending claims
+        boolean alreadyPending = memberClaimRepository
+                .existsByTargetMemberAndStatus(existingMember, ClaimStatus.PENDING);
+
+        if (alreadyPending) {
+            throw new BadRequestException("A claim request is already pending for this profile.");
+        }
+
         // 1. Link the profile to the current user
-        existingMember.setLinkedUser(currentUser);
-        existingMember.setOwner(currentUser);
-        existingMember.setMembershipStatus(MembershipStatus.PENDING_APPROVAL);
+//        existingMember.setLinkedUser(currentUser);
+//        existingMember.setOwner(currentUser);
+
+        MemberClaim memberClaim = MemberClaim.builder()
+                .targetMember(existingMember)
+                .currentOwner(existingMember.getOwner())
+                .requester(currentUser)
+                .status(ClaimStatus.PENDING)
+                .build();
+
+        memberClaimRepository.save(memberClaim);
+
+//        existingMember.setMembershipStatus(MembershipStatus.PENDING_APPROVAL);
         memberRepository.save(existingMember);
 
-        // 2. Update User record
-        currentUser.setMemberId(existingMember.getId());
+//        currentUser.setMemberId(existingMember.getId());
         currentUser.setStatus(UserStatus.ACTIVE);
         userRepository.save(currentUser);
 
-        auditService.logAction("PROFILE_CLAIM_REQUEST",
-                "User claimed existing profile ID: " + memberId);
+        auditService.logAction("PROFILE_CLAIM_REQUEST", "User claimed existing profile ID: " + memberId);
     }
 }

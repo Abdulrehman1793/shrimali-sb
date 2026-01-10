@@ -19,7 +19,7 @@ public interface AuthService {
 
     void resetPassword(ResetPasswordRequest request);
 
-    UserResponse me(Principal principal);
+    UserResponse me();
 
     AuthResponse generateToken(Principal principal);
 

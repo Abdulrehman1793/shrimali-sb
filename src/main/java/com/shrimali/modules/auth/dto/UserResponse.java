@@ -38,4 +38,8 @@ public class UserResponse {
 
     private boolean completed;
     private int completionPercentage;
+
+    private boolean claimUnderReview;
+    private Long claimedMemberId;
+    private String claimRequestedAt;
 }

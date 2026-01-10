@@ -4,8 +4,10 @@ import com.shrimali.exceptions.BadRequestException;
 import com.shrimali.model.auth.Otp;
 import com.shrimali.model.auth.User;
 import com.shrimali.model.enums.AuthProviderType;
+import com.shrimali.model.enums.ClaimStatus;
 import com.shrimali.model.enums.RoleName;
 import com.shrimali.model.member.Member;
+import com.shrimali.model.member.MemberClaim;
 import com.shrimali.modules.auth.dto.*;
 import com.shrimali.modules.auth.service.AuthService;
 import com.shrimali.modules.auth.service.security.JwtUtil;
@@ -15,6 +17,7 @@ import com.shrimali.modules.shared.services.AppUtils;
 import com.shrimali.modules.shared.services.EmailService;
 import com.shrimali.modules.shared.services.SecurityUtils;
 import com.shrimali.repositories.*;
+import com.shrimali.repositories.member.MemberClaimRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuditLogRepository auditLogRepository;
     private final UserRoleRepository userRoleRepository;
     private final UserSocialAccountRepository userSocialAccountRepository;
+    private final MemberClaimRepository memberClaimRepository;
 
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
@@ -162,18 +166,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserResponse me(Principal principal) {
-        User user = getUser(principal);
+    public UserResponse me() {
+        User user = securityUtils.getCurrentUser();
 
+        // 🔍 Check if user has a pending claim
+        Optional<MemberClaim> pendingClaimOpt =
+                memberClaimRepository.findTopByRequesterAndStatusOrderByCreatedAtDesc(
+                        user, ClaimStatus.PENDING
+                );
+
+        //  No member linked yet
         if (user.getMemberId() == null) {
-            return buildIncompleteProfileResponse(user);
+            return buildIncompleteProfileResponse(user, pendingClaimOpt);
         }
 
         Optional<Member> memberOpt = memberRepository.findById(user.getMemberId());
-
         if (memberOpt.isEmpty()) {
-            return buildIncompleteProfileResponse(user);
+            return buildIncompleteProfileResponse(user, pendingClaimOpt);
         }
+
         Member member = memberOpt.get();
 
         RoleName role = user.getAuthorities().stream()
@@ -186,19 +197,20 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .emailVerified(user.getEmailVerified())
                 .phoneVerified(user.getPhoneVerified())
+                .phone(user.getPhone())
                 .firstName(member.getFirstName())
                 .middleName(member.getMiddleName())
                 .lastName(member.getLastName())
                 .gender(member.getGender())
+                .dob(member.getDob() != null ? member.getDob().toString() : null)
                 .photoUrl(member.getPhotoUrl())
                 .thumbnailUrl(member.getThumbnailUrl())
-                .phone(user.getPhone())
-                .dob(member.getDob() != null ? member.getDob().toString() : null)
                 .role(role)
                 .status(user.getStatus())
-                .membershipStatus(member.getMembershipStatus())
                 .memberId(member.getId())
+                .membershipStatus(member.getMembershipStatus())
                 .completionPercentage(AppUtils.calculateCompletion(member))
+                .completed(true)
                 .build();
     }
 
@@ -247,14 +259,22 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.clearContext();
     }
 
-    private UserResponse buildIncompleteProfileResponse(User user) {
-        return UserResponse.builder()
+    private UserResponse buildIncompleteProfileResponse(
+            User user, Optional<MemberClaim> pendingClaimOpt) {
+        UserResponse.UserResponseBuilder builder = UserResponse.builder()
                 .email(user.getEmail())
                 .emailVerified(user.getEmailVerified())
                 .phone(user.getPhone())
                 .completed(false)
-                .completionPercentage(0)
-                .build();
+                .completionPercentage(0);
+
+        pendingClaimOpt.ifPresent(claim -> builder
+                .claimUnderReview(true)
+                .claimedMemberId(claim.getTargetMember().getId())
+                .claimRequestedAt(claim.getCreatedAt().toString())
+        );
+
+        return builder.build();
     }
 
     private User getUser(Principal principal) {

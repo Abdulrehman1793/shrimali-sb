@@ -2,10 +2,7 @@ package com.shrimali.model.member;
 
 import com.shrimali.model.Gotra;
 import com.shrimali.model.auth.User;
-import com.shrimali.model.enums.Gender;
-import com.shrimali.model.enums.MaritalStatus;
-import com.shrimali.model.enums.MembershipStatus;
-import com.shrimali.model.enums.ProfileStatus;
+import com.shrimali.model.enums.*;
 import lombok.*;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -92,10 +89,7 @@ public class Member {
     private String bloodGroup;
 
     @ElementCollection
-    @CollectionTable(
-            name = "member_secondary_professions",
-            joinColumns = @JoinColumn(name = "member_id")
-    )
+    @CollectionTable(name = "member_secondary_professions", joinColumns = @JoinColumn(name = "member_id"))
     @Column(name = "secondary_profession")
     private Set<String> secondaryProfession = new HashSet<>();
 
@@ -133,10 +127,7 @@ public class Member {
     private String thumbnailUrl;
 
     @ElementCollection
-    @CollectionTable(
-            name = "member_spoken_languages",
-            joinColumns = @JoinColumn(name = "member_id")
-    )
+    @CollectionTable(name = "member_spoken_languages", joinColumns = @JoinColumn(name = "member_id"))
     @Column(name = "language")
     private Set<String> spokenLanguages = new HashSet<>();
 
@@ -218,6 +209,10 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private Set<MemberRelationship> customRelationships = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "claim_status")
+    private ClaimStatus claimStatus;
+
 
     // --- Lifecycle Hooks ---
 
@@ -257,9 +252,7 @@ public class Member {
     }
 
     public static String generateMemberNumber(String first, String middle, String last) {
-        String initials = (first.charAt(0) +
-                (middle != null && !middle.isEmpty() ? middle.substring(0, 1) : "") +
-                last.charAt(0)).toUpperCase();
+        String initials = (first.charAt(0) + (middle != null && !middle.isEmpty() ? middle.substring(0, 1) : "") + last.charAt(0)).toUpperCase();
         String salt = String.valueOf(System.nanoTime());
         int uniqueHash = Math.abs((first + last + salt).hashCode()) % 10000000;
         return initials + "-" + String.format("%07d", uniqueHash);

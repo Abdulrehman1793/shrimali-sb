@@ -37,12 +37,8 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        return ResponseEntity.ok(authService.me(principal));
+    public ResponseEntity<?> me() {
+        return ResponseEntity.ok(authService.me());
     }
 
     private static final String COOKIE_NAME = "AUTH_TOKEN";
