@@ -1,6 +1,7 @@
 package com.shrimali.modules.member.controller;
 
 import com.shrimali.modules.member.dto.ActiveClaimResponse;
+import com.shrimali.modules.member.dto.ClaimActionRequest;
 import com.shrimali.modules.member.dto.UpdateClaimRequest;
 import com.shrimali.modules.member.services.MemberClaimService;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +25,10 @@ public class MemberClaimController {
     public void updateClaim(
             @PathVariable Long claimId, @RequestBody UpdateClaimRequest request) {
         memberClaimService.updateClaim(claimId, request);
+    }
+
+    @PostMapping("/{claimId}/actions")
+    public void revokeClaim(@PathVariable Long claimId, @RequestBody ClaimActionRequest request) {
+        memberClaimService.performAction(claimId, request);
     }
 }

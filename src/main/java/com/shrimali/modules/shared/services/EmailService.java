@@ -105,5 +105,151 @@ public class EmailService {
             log.error("Failed to send forgot password email to {}", email, ex);
         }
     }
+
+    @Async
+    public void sendClaimInitiatedEmail(String toEmail, String targetMemberName, Long claimId) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("New Profile Claim Submitted");
+
+            String html =
+                    "<html><body>" +
+                            "<div style='font-family: Arial, sans-serif; font-size:15px; line-height:1.7'>" +
+
+                            "<h3>New Profile Claim</h3>" +
+
+                            "<p>A claim has been submitted for the profile:</p>" +
+                            "<p><b>" + targetMemberName + "</b></p>" +
+
+                            "<p>The requester will submit identity verification details shortly.</p>" +
+
+                            "<p style='font-size:13px;color:#555'>Claim ID: " + claimId + "</p>" +
+
+                            "</div></body></html>";
+
+            helper.setText(html, true);
+            mailSender.send(message);
+
+        } catch (Exception ex) {
+            log.error("Failed to send claim initiated email for claim {}", claimId, ex);
+        }
+    }
+
+
+    @Async
+    public void sendClaimRequestEmail(
+            String toEmail, String requesterName, String targetMemberName, Long claimId) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("New Profile Claim Request");
+
+            String html =
+                    "<html><body>" +
+                            "<div style='font-family: Arial, sans-serif; font-size:15px; line-height:1.7'>" +
+
+                            "<h3>New Profile Claim Request</h3>" +
+
+                            "<p>A new claim request has been submitted.</p>" +
+
+                            "<p><b>Requester:</b> " + requesterName + "</p>" +
+                            "<p><b>Claimed Profile:</b> " + targetMemberName + "</p>" +
+
+                            "<p>You can review this claim by logging into the admin panel.</p>" +
+
+                            "<br/>" +
+                            "<p style='font-size:13px;color:#555'>Claim ID: " + claimId + "</p>" +
+
+                            "</div></body></html>";
+
+            helper.setText(html, true);
+            mailSender.send(message);
+
+        } catch (Exception ex) {
+            log.error("Failed to send claim request email for claim {}", claimId, ex);
+        }
+    }
+
+    @Async
+    public void sendClaimWithdrawnEmail(
+            String toEmail, String requesterName, String targetMemberName, Long claimId) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("Claim Request Withdrawn");
+
+            String html =
+                    "<html><body>" +
+                            "<div style='font-family: Arial, sans-serif; font-size:15px; line-height:1.7'>" +
+
+                            "<h3>Claim Request Withdrawn</h3>" +
+
+                            "<p>The following claim request has been withdrawn by the requester.</p>" +
+
+                            "<p><b>Requester:</b> " + requesterName + "</p>" +
+                            "<p><b>Claimed Profile:</b> " + targetMemberName + "</p>" +
+
+                            "<p>No further action is required.</p>" +
+
+                            "<br/>" +
+                            "<p style='font-size:13px;color:#555'>Claim ID: " + claimId + "</p>" +
+
+                            "</div></body></html>";
+
+            helper.setText(html, true);
+            mailSender.send(message);
+
+        } catch (Exception ex) {
+            log.error("Failed to send claim withdrawn email for claim {}", claimId, ex);
+        }
+    }
+
+    @Async
+    public void sendClaimReminderEmail(
+            String toEmail, String requesterName, String targetMemberName, Long claimId) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("Reminder: Pending Profile Claim");
+
+            String html =
+                    "<html><body>" +
+                            "<div style='font-family: Arial, sans-serif; font-size:15px; line-height:1.7'>" +
+
+                            "<h3>Pending Profile Claim Reminder</h3>" +
+
+                            "<p>This is a gentle reminder regarding a pending profile claim.</p>" +
+
+                            "<p><b>Requester:</b> " + requesterName + "</p>" +
+                            "<p><b>Claimed Profile:</b> " + targetMemberName + "</p>" +
+
+                            "<p>Please review the claim at your convenience.</p>" +
+
+                            "<br/>" +
+                            "<p style='font-size:13px;color:#555'>Claim ID: " + claimId + "</p>" +
+
+                            "</div></body></html>";
+
+            helper.setText(html, true);
+            mailSender.send(message);
+
+        } catch (Exception ex) {
+            log.error("Failed to send claim reminder email for claim {}", claimId, ex);
+        }
+    }
+
 }
 

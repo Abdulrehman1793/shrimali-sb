@@ -27,7 +27,8 @@ public class ActiveClaimResponse {
     private String note;
 
     private String status;
-    private LocalDateTime requestedAt;
+    private LocalDateTime lastReminderSentAt;
+    private Integer reminderCount;
 
     // ─────────────────────────────
     // Nested DTO

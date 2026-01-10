@@ -12,6 +12,7 @@ import com.shrimali.modules.member.dto.MemberDiscoveryDto;
 import com.shrimali.modules.member.dto.MemberMatchResponse;
 import com.shrimali.modules.member.services.MemberDiscoveryService;
 import com.shrimali.modules.shared.services.AuditService;
+import com.shrimali.modules.shared.services.EmailService;
 import com.shrimali.modules.shared.services.SecurityUtils;
 import com.shrimali.repositories.GotraRepository;
 import com.shrimali.repositories.MemberRepository;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +40,7 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
 
     private final AuditService auditService;
     private final SecurityUtils securityUtils;
+    private final EmailService emailService;
 
     public List<MemberMatchResponse> findPotentialMatches(MemberDiscoveryDto dto) {
         List<Member> members = memberRepository.findUnclaimedMatches(
@@ -144,18 +147,20 @@ public class MemberDiscoveryServiceImpl implements MemberDiscoveryService {
             throw new BadRequestException("A claim request is already pending for this profile.");
         }
 
-        // 1. Link the profile to the current user
-//        existingMember.setLinkedUser(currentUser);
-//        existingMember.setOwner(currentUser);
-
         MemberClaim memberClaim = MemberClaim.builder()
                 .targetMember(existingMember)
                 .currentOwner(existingMember.getOwner())
                 .requester(currentUser)
                 .status(ClaimStatus.PENDING)
+                .lastReminderSentAt(LocalDateTime.now())
+                .reminderCount(1)
                 .build();
 
-        memberClaimRepository.save(memberClaim);
+        MemberClaim saveMemberClaim = memberClaimRepository.save(memberClaim);
+
+        String targetFullName = String.format("%s %s %s",
+                existingMember.getFirstName(), existingMember.getMiddleName(), existingMember.getLastName());
+        emailService.sendClaimInitiatedEmail(currentUser.getEmail(), targetFullName, saveMemberClaim.getId());
 
 //        existingMember.setMembershipStatus(MembershipStatus.PENDING_APPROVAL);
         memberRepository.save(existingMember);

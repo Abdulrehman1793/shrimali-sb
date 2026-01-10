@@ -20,6 +20,10 @@ public class MemberClaim {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+     /* ======================
+       RELATIONSHIPS
+       ====================== */
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member targetMember; // The profile being claimed
@@ -32,8 +36,16 @@ public class MemberClaim {
     @JoinColumn(name = "current_owner_id")
     private User currentOwner; // The person who created the profile (e.g., the Son)
 
+    /* ======================
+       CLAIM STATE
+       ====================== */
+
     @Enumerated(EnumType.STRING)
     private ClaimStatus status = ClaimStatus.PENDING; // "PENDING", "APPROVED", "REJECTED"
+
+    /* ======================
+       REQUESTER INFO
+       ====================== */
 
     @Column(name = "requester_full_name", length = 200)
     private String requesterFullName;
@@ -50,9 +62,29 @@ public class MemberClaim {
     @Column(name = "identity_note", length = 500)
     private String identityNote; // optional explanation
 
-    // Token Logic for Authentication
+     /* ======================
+       VERIFICATION TOKEN
+       ====================== */
+
+    @Column(name = "verification_token_hash")
     private String verificationTokenHash;
+
+    @Column(name = "token_expiry")
     private LocalDateTime tokenExpiry;
+
+     /* ======================
+       REMINDER TRACKING
+       ====================== */
+
+    @Column(name = "last_reminder_sent_at")
+    private LocalDateTime lastReminderSentAt;
+
+    @Column(name = "reminder_count")
+    private Integer reminderCount = 0;
+
+     /* ======================
+       AUDIT
+       ====================== */
 
     @CreationTimestamp
     private LocalDateTime createdAt;
